@@ -75,7 +75,7 @@ user home, needed when the agent runs as root or SYSTEM), `--hash-limit-mb`, `--
 Example output line:
 
 ```json
-{"cryptoai":{"event":"finding","host":"web01","tool_version":"0.1.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
+{"cryptoai":{"event":"finding","host":"web01","tool_version":"0.1.1","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
 ```
 
 ## Wazuh integration
@@ -85,11 +85,14 @@ Example output line:
 2. Add `wazuh/agent/ossec-agent-snippet.xml` to the agent configuration. It runs the scan every 12 hours through the
    command wodle. Depending on your Wazuh version, agents may need remote commands enabled for centrally pushed
    command wodles; check the Wazuh documentation for your release.
-3. Test the decoders and rules offline with `wazuh-logtest`, pasting the lines from `wazuh/samples/logtest.txt`.
+3. Test offline with `wazuh-logtest` (paste the lines from `wazuh/samples/logtest.txt`) or run `scripts/logtest_docker.sh`.
 
-> **Heads up:** the decoders and rules are checked in CI for well-formed XML, unique IDs in the reserved range
-> (100900 to 100999), and one rule per finding the tool can emit. They have **not** been run against a live Wazuh
-> manager from this repository. Run `wazuh-logtest` before you deploy.
+> **Tested against Wazuh 4.14.10.** `scripts/logtest_docker.sh` starts a real Wazuh manager container, loads the
+> decoders and rules, and runs every line in `wazuh/samples/logtest.txt` through `wazuh-logtest`, asserting the rule
+> that fires. It found and fixed two real problems that unit tests could not: Wazuh's built-in `ossec` decoder claims
+> command-wodle lines first, and bare JSON lines are decoded by the built-in `json` decoder. What is **not** yet
+> covered is a full agent-to-manager run through the command wodle, and Wazuh 5.x (still a release candidate when
+> this was written).
 
 The command-wodle approach keeps the add-on a separate process that talks to Wazuh only through logs. It contains no
 Wazuh code or data files. See [docs/LICENSING-NOTES.md](docs/LICENSING-NOTES.md) for how that relates to Wazuh's own
@@ -98,6 +101,8 @@ license terms. That is a design intent, not legal advice.
 ### Alerts and compliance tags
 
 Each rule carries group tags you can filter on in the dashboard. They are lookup aids, not statements of compliance.
+Wazuh promotes the `pci_dss_` tag into its native `rule.pci_dss` field (verified with `wazuh-logtest`), so these alerts
+also appear in Wazuh's built-in PCI DSS dashboard.
 
 | Findings | Tags |
 |---|---|

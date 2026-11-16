@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wazuh-cryptoai-inventory"
-version = "0.1.0"
+version = "0.1.1"
 description = "Endpoint cryptographic (CBOM) and AI/MCP (AI-BOM) inventory with drift detection and signed attestations, built to feed Wazuh."
 readme = "README.md"
 requires-python = ">=3.9"

@@ -25,6 +25,6 @@ written to be a poor attack target and a poor data leak.
 - Ed25519 attestations are classical signatures. They protect integrity today, not against a future quantum
   adversary. A post-quantum signature suite is on the roadmap.
 - Output files describe real hosts (paths, hostnames, certificate subjects). Treat them as sensitive.
-- The Wazuh decoders and rules have not been exercised against a live manager in this repository's CI.
-  Validate with `wazuh-logtest` using `wazuh/samples/logtest.txt` before deploying.
+- The Wazuh decoders and rules were verified with `wazuh-logtest` on a Wazuh 4.14.10 manager
+  (`scripts/logtest_docker.sh`), but not in an end-to-end agent run, not on Wazuh 5.x, and not in CI.
 - `--all-users` reads other users' home directories and therefore needs the privileges to do so. That is its purpose.

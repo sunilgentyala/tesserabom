@@ -41,6 +41,15 @@ Re-check anything marked **Unconfirmed** against the primary source before relyi
 | OpenSSL 3.5 adds ML-KEM, ML-DSA and SLH-DSA (FIPS 203, 204, 205), is an LTS release, and prefers a hybrid X25519MLKEM768 TLS group by default | **Corroborated** by several secondary sources and the project's pre-release announcement. The final release post was not fetched directly. The tool only relies on the 3.5 threshold for ML-KEM. |
 | Wazuh 4.14.x has no native CBOM, crypto inventory or AI inventory | A targeted search of the 4.14.x release notes and changelogs (4.14.0 through 4.14.10) found no SBOM, CBOM, cryptographic inventory, AI inventory or post-quantum feature. The 4.14.0 inventory expansion covers browser extensions, services, users and groups. No public roadmap page was found, so future plans are unknown. Not every release's full notes were read, and the 5.0 line was still a release candidate. |
 
+## Wazuh behaviour
+
+| Item | Status |
+|---|---|
+| Decoders and rules produce the expected alerts | **Confirmed** on Wazuh 4.14.10 with `wazuh-logtest` (`scripts/logtest_docker.sh`). |
+| `pci_dss_*` group tags are promoted to the native `rule.pci_dss` field | **Confirmed** in the same run. |
+| Command wodle output reaches the rules end to end from a real agent | **Not tested.** Only the log-line format is verified. |
+| Wazuh 5.x (Engine replaces analysisd) | **Not tested.** Rule and decoder syntax may need changes. |
+
 ## Detection claims and their limits
 
 - **TLS post-quantum status** is what the endpoint negotiates with this client. If the client library cannot

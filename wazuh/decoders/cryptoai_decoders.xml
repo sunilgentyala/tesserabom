@@ -1,16 +1,11 @@
 <!-- wazuh-cryptoai-inventory decoders -->
-<!-- Wrapped form produced by the Wazuh command wodle. -->
-<decoder name="cryptoai">
-  <prematch>^ossec: output: 'cryptoai-inventory': </prematch>
-</decoder>
-
+<!--
+  Bare JSON lines are handled by Wazuh's built-in json decoder, so only the wrapped
+  command-wodle form needs a decoder. Wazuh's built-in "ossec" decoder claims those
+  lines first, so this is a child of it that parses the JSON payload.
+-->
 <decoder name="cryptoai-json">
-  <parent>cryptoai</parent>
-  <plugin_decoder offset="after_parent">JSON_Decoder</plugin_decoder>
-</decoder>
-
-<!-- Bare JSON line, for use with a localfile or an integration. -->
-<decoder name="cryptoai">
-  <prematch>^{"cryptoai":</prematch>
-  <plugin_decoder>JSON_Decoder</plugin_decoder>
+  <parent>ossec</parent>
+  <prematch offset="after_parent">^output: 'cryptoai-inventory': </prematch>
+  <plugin_decoder offset="after_prematch">JSON_Decoder</plugin_decoder>
 </decoder>
