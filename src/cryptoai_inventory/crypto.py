@@ -84,7 +84,8 @@ def certificate_asset(cert: x509.Certificate, source: str, store: str) -> Dict[s
         sig_hash = None
     try:
         is_ca = cert.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
-    except x509.ExtensionNotFound:
+    except (x509.ExtensionNotFound, ValueError):
+        # Absent, or malformed in the wild (real trust stores contain such certificates).
         is_ca = False
     return {
         "kind": "certificate",
@@ -104,6 +105,14 @@ def certificate_asset(cert: x509.Certificate, source: str, store: str) -> Dict[s
         "source": source,
         "store": store,
     }
+
+
+def _safe_asset(cert: x509.Certificate, source: str, store: str) -> Optional[Dict[str, Any]]:
+    """Build an asset, skipping certificates the parser cannot fully read."""
+    try:
+        return certificate_asset(cert, source, store)
+    except (ValueError, TypeError):
+        return None
 
 
 def certificate_findings(asset: Dict[str, Any], now: Optional[dt.datetime] = None) -> List[Dict[str, Any]]:
@@ -171,8 +180,9 @@ def scan_cert_dirs(dirs: Iterable[str]) -> List[Dict[str, Any]]:
             if not data:
                 continue
             for cert in _load_cert_bytes(data):
-                asset = certificate_asset(cert, "file:" + path, "filesystem")
-                assets.setdefault(asset["id"], asset)
+                asset = _safe_asset(cert, "file:" + path, "filesystem")
+                if asset:
+                    assets.setdefault(asset["id"], asset)
     return list(assets.values())
 
 
@@ -189,8 +199,9 @@ def scan_windows_store() -> List[Dict[str, Any]]:
             if encoding != "x509_asn" or len(assets) >= MAX_CERTS_TOTAL:
                 continue
             for cert in _load_cert_bytes(der):
-                asset = certificate_asset(cert, "windows-store:" + store_name, store_name.lower())
-                assets.setdefault(asset["id"], asset)
+                asset = _safe_asset(cert, "windows-store:" + store_name, store_name.lower())
+                if asset:
+                    assets.setdefault(asset["id"], asset)
     return list(assets.values())
 
 
@@ -238,8 +249,9 @@ def probe_tls(port: int, host: str = "127.0.0.1", timeout: float = 3.0) -> Optio
     cert_asset = None
     if der:
         for cert in _load_cert_bytes(der):
-            cert_asset = certificate_asset(cert, "tls:%s:%d" % (host, port), "network")
-            endpoint["certificate_id"] = cert_asset["id"]
+            cert_asset = _safe_asset(cert, "tls:%s:%d" % (host, port), "network")
+            if cert_asset:
+                endpoint["certificate_id"] = cert_asset["id"]
     return {"endpoint": endpoint, "certificate": cert_asset}
 
 

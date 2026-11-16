@@ -112,3 +112,41 @@ def test_ssh_binary_never_resolved_from_path(monkeypatch, tmp_path):
     monkeypatch.setenv("PATH", str(tmp_path))
     monkeypatch.setattr(crypto, "_TRUSTED_SSH", ())
     assert crypto.openssh_version() is None
+
+
+class _MalformedExtensions:
+    """Delegates to a real certificate but fails to parse extensions, as some trust-store entries do."""
+
+    def __init__(self, cert):
+        self._cert = cert
+
+    def __getattr__(self, name):
+        return getattr(self._cert, name)
+
+    @property
+    def extensions(self):
+        raise ValueError("error parsing asn1 value")
+
+
+def test_malformed_extension_does_not_abort_asset_creation():
+    cert, _ = make_cert("odd.example", issuer_cn="CA")
+    asset = crypto.certificate_asset(_MalformedExtensions(cert), "t", "t")
+    assert asset["is_ca"] is False and asset["subject"] == "CN=odd.example"
+
+
+def test_unparseable_certificate_is_skipped_not_fatal(tmp_path, monkeypatch):
+    d = tmp_path / "c"
+    d.mkdir()
+    for name in ("good", "bad"):
+        cert, _ = make_cert(name, issuer_cn="CA")
+        (d / (name + ".pem")).write_bytes(pem(cert))
+    real = crypto.certificate_asset
+
+    def flaky(cert, source, store):
+        if "bad" in source:
+            raise ValueError("boom")
+        return real(cert, source, store)
+
+    monkeypatch.setattr(crypto, "certificate_asset", flaky)
+    assets = crypto.scan_cert_dirs([str(d)])
+    assert [a["subject"] for a in assets] == ["CN=good"]
