@@ -3,138 +3,254 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tesserabom</title>
+<title>tesserabom | Endpoint CBOM and AI-BOM</title>
 <meta name="description" content="Endpoint CycloneDX CBOM and AI-BOM for open-source SIEM platforms, with baseline drift and downgrade alerts, signed attestations, and rules verified on a real SIEM manager.">
 <link rel="icon" href="assets/tesserabom-mark.svg" type="image/svg+xml">
 <style>
   :root {
-    --bg: #f8fafc; --surface: #ffffff; --ink: #0f172a; --muted: #475569; --line: #e2e8f0;
-    --brand: #0369a1; --brand-ink: #ffffff; --code-bg: #0f172a; --code-ink: #e2e8f0;
-    --a: #38bdf8; --b: #818cf8; --c: #34d399; --d: #f59e0b;
+    --bg:#f3f6fa; --surface:#ffffff; --surface2:#f8fafc; --ink:#0f172a; --muted:#52627a; --line:#dde5ef;
+    --brand:#0369a1; --brand-soft:#e0f2fe; --brand-ink:#ffffff;
+    --side:#0b1428; --side-ink:#c5d0e3; --side-line:#1b2a4a; --side-active:#13264a;
+    --code-bg:#0b1428; --code-ink:#e2e8f0;
+    --a:#38bdf8; --b:#818cf8; --c:#34d399; --d:#f59e0b; --bad:#f43f5e; --ok:#10b981;
+    --shadow:0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0b1120; --surface: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #22304a;
-      --brand: #38bdf8; --brand-ink: #0b1120; --code-bg: #060b16; --code-ink: #e2e8f0;
+      --bg:#080e1d; --surface:#0f1830; --surface2:#0c1428; --ink:#e6ecf7; --muted:#97a6c1; --line:#1d2b4b;
+      --brand:#38bdf8; --brand-soft:#0f2a44; --brand-ink:#06101f; --side:#060b17; --side-active:#102042;
+      --code-bg:#050a15; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0b1120; --surface: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #22304a;
-    --brand: #38bdf8; --brand-ink: #0b1120; --code-bg: #060b16; --code-ink: #e2e8f0;
+    --bg:#080e1d; --surface:#0f1830; --surface2:#0c1428; --ink:#e6ecf7; --muted:#97a6c1; --line:#1d2b4b;
+    --brand:#38bdf8; --brand-soft:#0f2a44; --brand-ink:#06101f; --side:#060b17; --side-active:#102042;
+    --code-bg:#050a15; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:76px; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  a { color:var(--brand); }
+  code,pre,.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  :focus-visible { outline:3px solid var(--brand); outline-offset:2px; border-radius:6px; }
+
+  /* shell */
+  .side { position:fixed; inset:0 auto 0 0; width:248px; background:var(--side); color:var(--side-ink); display:flex; flex-direction:column; padding:18px 12px; z-index:30; overflow-y:auto; transition:transform .2s; }
+  .logo { display:flex; align-items:center; gap:10px; padding:4px 8px 18px; color:#fff; text-decoration:none; font-weight:800; letter-spacing:.01em; }
+  .logo img { width:32px; height:32px; }
+  .side small { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#6b7c9c; padding:10px 10px 6px; }
+  .side nav a { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; color:var(--side-ink); text-decoration:none; font-size:14.5px; margin-bottom:2px; }
+  .side nav a:hover { background:var(--side-active); color:#fff; }
+  .side nav a.on { background:var(--side-active); color:#fff; box-shadow:inset 3px 0 0 var(--a); }
+  .side nav svg { width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .side .foot { margin-top:auto; padding:14px 10px 0; border-top:1px solid var(--side-line); font-size:12.5px; color:#7f90b0; }
+  .side .foot b { color:#dbe5f7; display:block; font-size:13px; }
+  main { margin-left:248px; min-height:100vh; }
+  .top { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:12px; padding:12px 28px; background:color-mix(in srgb,var(--bg) 85%,transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .crumb { font-size:13px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+  .crumb b { color:var(--ink); }
+  .spacer { flex:1; }
+  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); font-size:13px; color:var(--muted); }
+  .iconbtn { width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; font-size:16px; }
+  .menubtn { display:none; }
+  .content { padding:24px 28px 60px; max-width:1180px; }
+
+  /* hero */
+  .hero { position:relative; overflow:hidden; border-radius:22px; padding:44px; color:#eaf2ff; background:radial-gradient(900px 400px at 85% 10%,rgba(56,189,248,.28),transparent 60%),radial-gradient(700px 400px at 0% 100%,rgba(129,140,248,.25),transparent 60%),linear-gradient(135deg,#0a1a3a,#0b2a4f 55%,#0a3a4a); box-shadow:var(--shadow); display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center; }
+  .eyebrow { font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#9fe3ff; display:flex; align-items:center; gap:8px; }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:var(--c); box-shadow:0 0 0 0 rgba(52,211,153,.7); animation:pulse 1.8s infinite; }
+  @keyframes pulse { 70% { box-shadow:0 0 0 10px rgba(52,211,153,0); } 100% { box-shadow:0 0 0 0 rgba(52,211,153,0); } }
+  .hero h1 { font-size:clamp(2rem,4.6vw,3.4rem); line-height:1.05; margin:14px 0 14px; letter-spacing:-.025em; }
+  .hero h1 span { background:linear-gradient(90deg,#38bdf8,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p { color:#bcd0ee; max-width:52ch; margin:0 0 22px; }
+  .cta { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:11px; font-weight:650; text-decoration:none; border:1px solid rgba(255,255,255,.22); color:#eaf2ff; background:rgba(255,255,255,.06); cursor:pointer; font-size:15px; }
+  .btn.primary { background:linear-gradient(90deg,#38bdf8,#34d399); color:#04121f; border-color:transparent; }
+  .btn:hover { filter:brightness(1.08); }
+  .mosaic { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; aspect-ratio:3/2; }
+  .mosaic i { border-radius:7px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.08); animation:tile 4.5s infinite; }
+  .mosaic i.a { background:rgba(56,189,248,.75); } .mosaic i.b { background:rgba(129,140,248,.75); }
+  .mosaic i.c { background:rgba(52,211,153,.75); } .mosaic i.d { background:rgba(245,158,11,.8); }
+  @keyframes tile { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.45; transform:scale(.92); } }
+  .mosaic-cap { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:#8fb0d8; margin-top:10px; display:flex; justify-content:space-between; }
+
+  /* stats */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0 8px; }
+  .stat { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:baseline; gap:10px; box-shadow:var(--shadow); }
+  .stat b { font-size:1.6rem; letter-spacing:-.02em; }
+  .stat span { color:var(--muted); font-size:13.5px; }
+
+  section { padding-top:34px; }
+  .kicker { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  h2 { font-size:1.65rem; margin:4px 0 6px; letter-spacing:-.015em; }
+  .lead { color:var(--muted); max-width:74ch; margin:0 0 18px; }
+
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow); position:relative; overflow:hidden; transition:transform .15s,border-color .15s; }
+  .card:hover { transform:translateY(-2px); border-color:var(--brand); }
+  .card::before { content:""; position:absolute; inset:0 0 auto 0; height:3px; background:var(--tint,var(--a)); }
+  .card h3 { margin:6px 0 6px; font-size:1.05rem; }
+  .card p { margin:0; color:var(--muted); font-size:14.5px; }
+  .ico { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:color-mix(in srgb,var(--tint,var(--a)) 18%,transparent); color:var(--tint,var(--a)); font-weight:800; }
+
+  /* live panels */
+  .live { display:grid; gap:14px; grid-template-columns:1.1fr .9fr; }
+  .panel { background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; }
+  .panel header { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--line); background:var(--surface2); }
+  .panel header h3 { margin:0; font-size:1rem; }
+  .panel header .when { margin-left:auto; font-size:12.5px; color:var(--muted); }
+  .rows { padding:6px 18px 12px; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px dashed var(--line); font-size:14.5px; }
+  .row:last-child { border-bottom:0; }
+  .row .k { color:var(--muted); }
+  .row .v { font-weight:650; text-align:right; word-break:break-word; }
+  .tag { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:700; }
+  .tag.ok { background:color-mix(in srgb,var(--ok) 18%,transparent); color:var(--ok); }
+  .tag.bad { background:color-mix(in srgb,var(--bad) 18%,transparent); color:var(--bad); }
+  .tag.warn { background:color-mix(in srgb,var(--d) 20%,transparent); color:var(--d); }
+  .tag.idle { background:var(--line); color:var(--muted); }
+  .small { font-size:12.5px; color:var(--muted); padding:0 18px 14px; margin:0; }
+  .skeleton { color:var(--muted); font-weight:500; }
+
+  /* flow */
+  .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:0; counter-reset:s; }
+  .step { position:relative; background:var(--surface); border:1px solid var(--line); padding:18px 16px 18px 16px; font-size:14px; }
+  .step:first-child { border-radius:16px 0 0 16px; } .step:last-child { border-radius:0 16px 16px 0; }
+  .step::before { counter-increment:s; content:counter(s); display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--brand); color:var(--brand-ink); font-weight:800; font-size:13px; margin-bottom:10px; }
+  .step b { display:block; font-size:1.02rem; margin-bottom:4px; }
+  .step span { color:var(--muted); }
+
+  /* code */
+  .codebox { position:relative; }
+  pre { background:var(--code-bg); color:var(--code-ink); padding:18px; border-radius:14px; overflow-x:auto; font-size:13.5px; line-height:1.6; margin:0; border:1px solid var(--side-line); }
+  .copy { position:absolute; top:10px; right:10px; padding:5px 10px; border-radius:8px; border:1px solid #2a3b60; background:#10203f; color:#cfe0ff; font-size:12px; cursor:pointer; }
+  .tok-c { color:#6b7c9c; } .tok-k { color:#7dd3fc; } .tok-s { color:#86efac; }
+
+  .tablewrap { overflow-x:auto; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:var(--shadow); }
+  table { border-collapse:collapse; width:100%; min-width:600px; font-size:14.5px; }
+  th,td { text-align:left; padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--surface2); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  tr:last-child td { border-bottom:0; }
+  .note { border:1px solid var(--line); border-left:4px solid var(--d); background:var(--surface); padding:16px 18px; border-radius:14px; color:var(--muted); }
+  .note li { margin:4px 0; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; }
+
+  @media (max-width:1000px) {
+    .hero { grid-template-columns:1fr; padding:28px; } .live { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,1fr); }
+    .flow { grid-template-columns:1fr 1fr; } .step { border-radius:0 !important; }
   }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
-  nav { border-bottom: 1px solid var(--line); background: var(--surface); }
-  nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; flex-wrap: wrap; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
-  .brand img { width: 28px; height: 28px; }
-  nav .links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 15px; }
-  nav a, .links a { color: var(--muted); text-decoration: none; }
-  nav a:hover { color: var(--brand); }
-  header.hero { padding: 64px 0 40px; text-align: center; }
-  header.hero img { width: 88px; height: 88px; }
-  h1 { font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.1; margin: 16px 0 8px; letter-spacing: -0.02em; }
-  .lede { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--muted); max-width: 40ch; margin: 0 auto 12px; }
-  .sub { color: var(--muted); max-width: 62ch; margin: 0 auto 28px; }
-  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn { display: inline-block; padding: 10px 18px; border-radius: 10px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
-  .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
-  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 24px; font-size: 13px; }
-  .badge { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
-  section { padding: 40px 0; }
-  h2 { font-size: 1.6rem; margin: 0 0 8px; letter-spacing: -0.01em; }
-  h2 + p { color: var(--muted); margin-top: 0; max-width: 70ch; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
-  .card h3 { margin: 0 0 6px; font-size: 1.05rem; }
-  .card p { margin: 0; color: var(--muted); font-size: 15px; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; }
-  pre { background: var(--code-bg); color: var(--code-ink); padding: 16px; border-radius: 12px; overflow-x: auto; font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
-  .flow { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 20px; align-items: stretch; }
-  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 14px; text-align: center; }
-  .step b { display: block; margin-bottom: 4px; }
-  .tablewrap { overflow-x: auto; margin-top: 16px; }
-  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-width: 560px; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
-  tr:last-child td { border-bottom: 0; }
-  .note { border-left: 4px solid var(--d); background: var(--surface); padding: 12px 16px; border-radius: 0 10px 10px 0; color: var(--muted); margin-top: 16px; }
-  footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: 14px; text-align: center; }
-  footer a { color: var(--brand); }
-  a { color: var(--brand); }
-  :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+  @media (max-width:820px) {
+    .side { transform:translateX(-100%); } .side.open { transform:none; box-shadow:0 0 0 100vmax rgba(0,0,0,.5); }
+    main { margin-left:0; } .menubtn { display:block; } .content { padding:16px; } .top { padding:10px 16px; }
+    .pill.hide-s { display:none; }
+  }
+  @media (max-width:520px) { .flow { grid-template-columns:1fr; } .stats { grid-template-columns:1fr 1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
 </style>
 </head>
 <body>
-<nav>
-  <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/tesserabom-mark.svg" alt="">tesserabom</a>
-    <div class="links">
-      <a href="#features">Features</a><a href="#how">How it works</a><a href="#start">Quick start</a>
-      <a href="#compare">How it differs</a><a href="#limits">Limits</a>
-      <a href="https://github.com/sunilgentyala/tesserabom">GitHub</a>
+<aside class="side" id="side">
+  <a class="logo" href="#overview"><img src="assets/tesserabom-mark.svg" alt="">tesserabom</a>
+  <small>Workspace</small>
+  <nav id="nav">
+    <a href="#overview" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a>
+    <a href="#live"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Live data</a>
+    <a href="#features"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Inventories</a>
+    <a href="#how"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 17h16M14 7l3-3m-3 3l3 3"/></svg>How it works</a>
+    <a href="#start"><svg viewBox="0 0 24 24"><path d="M5 8l4 4-4 4M12 17h7"/></svg>Quick start</a>
+    <a href="#compare"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>How it differs</a>
+    <a href="#limits"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5m0 3h.01"/></svg>Honest limits</a>
+    <a href="https://github.com/sunilgentyala/tesserabom"><svg viewBox="0 0 24 24"><path d="M9 19c-4 1.5-4-2-6-2m12 4v-3.5a3 3 0 0 0-1-2.5c3.5-.4 6-1.700 6-7a5 5 0 0 0-1.300-3.500 4.700 4.700 0 0 0 0-3.500s-1.100-.3-3.500 1.300a12 12 0 0 0-6 0C6.700 2.700 5.600 3 5.600 3a4.700 4.700 0 0 0 0 3.500A5 5 0 0 0 4.300 10c0 5.300 2.500 6.600 6 7a3 3 0 0 0-1 2.500V21"/></svg>GitHub</a>
+  </nav>
+  <div class="foot"><b>Apache-2.0</b>Alpha. Pre-release v0.3.x.<br>Built for audit-ready crypto and AI inventory.</div>
+</aside>
+
+<main>
+  <div class="top">
+    <button class="iconbtn menubtn" id="menu" aria-label="Open menu">&#9776;</button>
+    <div class="crumb">Workspace / <b id="crumb">Overview</b></div>
+    <div class="spacer"></div>
+    <span class="pill hide-s"><span class="live-dot"></span><span id="topstatus">connecting to GitHub</span></span>
+    <button class="iconbtn" id="theme" aria-label="Toggle light or dark theme">&#9680;</button>
+  </div>
+
+  <div class="content">
+    <div class="hero" id="overview">
+      <div>
+        <div class="eyebrow"><span class="live-dot"></span>Endpoint CBOM + AI-BOM</div>
+        <h1>One tile per endpoint.<br><span>One mosaic of every cipher and every model.</span></h1>
+        <p>Endpoint <strong>CBOM</strong> and <strong>AI-BOM</strong> with baseline <strong>drift and downgrade alerts</strong>, <strong>signed attestations</strong>, and <strong>SIEM-native rules</strong> verified on a real manager.</p>
+        <div class="cta">
+          <a class="btn primary" href="#start">Quick start &rarr;</a>
+          <a class="btn" href="#live">See live data</a>
+          <a class="btn" href="https://github.com/sunilgentyala/tesserabom/releases">Releases</a>
+        </div>
+      </div>
+      <div aria-hidden="true">
+        <div class="mosaic" id="mosaic"></div>
+        <div class="mosaic-cap"><span>Each tile is an asset</span><span>cert, TLS, SSH, model, MCP</span></div>
+      </div>
     </div>
-  </div>
-</nav>
 
-<header class="hero" id="top">
-  <div class="wrap">
-    <img src="assets/tesserabom-mark.svg" alt="tesserabom mark: four colored tiles">
-    <h1>One tile per endpoint.</h1>
-    <p class="lede">One mosaic of every cipher and every model you run.</p>
-    <p class="sub">Endpoint <strong>CBOM</strong> and <strong>AI-BOM</strong> with baseline <strong>drift and downgrade alerts</strong>,
-      <strong>signed attestations</strong>, and <strong>SIEM-native rules</strong> verified on a real manager.</p>
-    <div class="cta">
-      <a class="btn primary" href="https://github.com/sunilgentyala/tesserabom#quick-start">Get started</a>
-      <a class="btn" href="https://github.com/sunilgentyala/tesserabom/releases">Releases</a>
+    <div class="stats">
+      <div class="stat"><b>19</b><span>SIEM rules</span></div>
+      <div class="stat"><b>CDX 1.6</b><span>schema validated</span></div>
+      <div class="stat"><b>Ed25519</b><span>DSSE attestations</span></div>
+      <div class="stat"><b id="st-rel">...</b><span>latest release (live)</span></div>
     </div>
-    <div class="badges">
-      <span class="badge">Apache-2.0</span><span class="badge">Python 3.9 to 3.13</span>
-      <span class="badge">CycloneDX 1.6 schema-validated</span><span class="badge">a 4.14.10 manager logtest verified</span>
-      <span class="badge">alpha</span>
-    </div>
-  </div>
-</header>
 
-<main class="wrap">
-<section id="features">
-  <h2>Two inventories auditors keep asking for</h2>
-  <p>Which cryptography is really running here, and how ready is it for post-quantum migration? Which AI models and MCP servers
-    are on these machines? The SIEM gives you excellent telemetry, and the 4.14.x release notes searched in November 2026 show no
-    native answer to either.</p>
-  <div class="grid">
-    <div class="card"><h3><span class="dot" style="background:var(--a)"></span>CBOM</h3>
-      <p>Certificates, TLS endpoint posture, SSH key exchange and crypto libraries, flagged for quantum vulnerability. CycloneDX 1.6.</p></div>
-    <div class="card"><h3><span class="dot" style="background:var(--b)"></span>AI-BOM</h3>
-      <p>Local model files (hashed, header-checked), MCP server configs, and local AI runtimes. Credentials are never read, only key names.</p></div>
-    <div class="card"><h3><span class="dot" style="background:var(--c)"></span>Drift and downgrade</h3>
-      <p>A baseline remembers every asset. Alerts fire on changes, and on downgrades such as TLS 1.3 falling to 1.2.</p></div>
-    <div class="card"><h3><span class="dot" style="background:var(--d)"></span>Signed attestations</h3>
-      <p>Each BOM can be wrapped in a DSSE envelope signed with Ed25519, so an inventory can be proven untampered.</p></div>
-  </div>
-</section>
+    <section id="live">
+      <div class="kicker">Real-time</div>
+      <h2>Live data</h2>
+      <p class="lead">Both panels fetch fresh data every time you open this page and refresh on their own. The left one reads the public GitHub API for this project. The right one runs a real cryptographic probe on your own browser, the same idea the collector applies to an endpoint.</p>
+      <div class="live">
+        <div class="panel">
+          <header><h3>Project pulse (GitHub API)</h3><span class="when" id="gh-when">loading</span></header>
+          <div class="rows" id="gh-rows">
+            <div class="row"><span class="k">Latest release</span><span class="v skeleton">loading...</span></div>
+          </div>
+          <p class="small">Unauthenticated public API, refreshed every 2 minutes. If GitHub rate limits this network, values show as unavailable instead of stale numbers.</p>
+        </div>
+        <div class="panel">
+          <header><h3>Your browser crypto posture</h3><span class="when" id="bx-when">probing</span></header>
+          <div class="rows" id="bx-rows">
+            <div class="row"><span class="k">Probe</span><span class="v skeleton">running...</span></div>
+          </div>
+          <p class="small">Runs locally and sends nothing anywhere. It tests what this browser can actually do, and flags algorithms a quantum computer would break.</p>
+        </div>
+      </div>
+    </section>
 
-<section id="how">
-  <h2>How it works</h2>
-  <p>A collector runs on each endpoint, writes the BOMs, and prints one JSON line per finding. The SIEM reads those lines through
-    the command wodle and applies 19 rules tagged for PCI DSS, DORA and NYDFS lookups.</p>
-  <div class="flow" role="list">
-    <div class="step" role="listitem"><b>1. Scan</b>certificates, TLS, SSH, models, MCP</div>
-    <div class="step" role="listitem"><b>2. Compare</b>baseline drift and downgrades</div>
-    <div class="step" role="listitem"><b>3. Attest</b>CycloneDX plus DSSE signature</div>
-    <div class="step" role="listitem"><b>4. Alert</b>SIEM decoder, rules, dashboards</div>
-  </div>
-</section>
+    <section id="features">
+      <div class="kicker">Inventories</div>
+      <h2>Two inventories auditors keep asking for</h2>
+      <p class="lead">Which cryptography is really running here, and how ready is it for post-quantum migration? Which AI models and MCP servers are on these machines? The SIEM gives you excellent telemetry, and the 4.14.x release notes searched in November 2026 show no native answer to either.</p>
+      <div class="grid">
+        <div class="card" style="--tint:var(--a)"><div class="ico">C</div><h3>CBOM</h3><p>Certificates, TLS endpoint posture, SSH key exchange and crypto libraries, flagged for quantum vulnerability. CycloneDX 1.6.</p></div>
+        <div class="card" style="--tint:var(--b)"><div class="ico">AI</div><h3>AI-BOM</h3><p>Local model files (hashed, header-checked), MCP server configs, and local AI runtimes. Credentials are never read, only key names.</p></div>
+        <div class="card" style="--tint:var(--c)"><div class="ico">&Delta;</div><h3>Drift and downgrade</h3><p>A baseline remembers every asset. Alerts fire on changes, and on downgrades such as TLS 1.3 falling to 1.2.</p></div>
+        <div class="card" style="--tint:var(--d)"><div class="ico">&#10003;</div><h3>Signed attestations</h3><p>Each BOM can be wrapped in a DSSE envelope signed with Ed25519, so an inventory can be proven untampered.</p></div>
+      </div>
+    </section>
 
-<section id="start">
-  <h2>Quick start</h2>
-  <pre><code>pip install .
+    <section id="how">
+      <div class="kicker">Pipeline</div>
+      <h2>How it works</h2>
+      <p class="lead">A collector runs on each endpoint, writes the BOMs, and prints one JSON line per finding. The SIEM reads those lines through the command wodle and applies 19 rules tagged for PCI DSS, DORA and NYDFS lookups.</p>
+      <div class="flow">
+        <div class="step"><b>Scan</b><span>certificates, TLS, SSH, models, MCP</span></div>
+        <div class="step"><b>Compare</b><span>baseline drift and downgrades</span></div>
+        <div class="step"><b>Attest</b><span>CycloneDX plus DSSE signature</span></div>
+        <div class="step"><b>Alert</b><span>SIEM decoder, rules, dashboards</span></div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="kicker">Install</div>
+      <h2>Quick start</h2>
+      <div class="codebox">
+        <button class="copy" data-copy="start-code">Copy</button>
+<pre id="start-code"><code>pip install .
 
 tesserabom keygen --dir /etc/tesserabom
 tesserabom scan --out /var/lib/tesserabom/out \
@@ -144,46 +260,176 @@ tesserabom scan --out /var/lib/tesserabom/out \
 
 tesserabom verify out/cbom.dsse.json --pub /etc/tesserabom/tesserabom-signing.pub
 tesserabom diff old/cbom.json new/cbom.json</code></pre>
-  <p>SIEM content (decoder, rules, agent snippet) is in the <code>siem/</code> folder and in each release as a zip.
-    <code>scripts/logtest_docker.sh</code> repeats the manager test.</p>
-</section>
+      </div>
+      <p class="lead" style="margin-top:14px">SIEM content (decoder, rules, agent snippet) is in the <code>siem/</code> folder and in each release as a zip. <code>scripts/logtest_docker.sh</code> repeats the manager test.</p>
+    </section>
 
-<section id="compare">
-  <h2>How it differs</h2>
-  <p>Found in a November 2026 search that was broad but not exhaustive: to our knowledge, no open-source project combines endpoint
-    collection, CBOM plus AI-BOM, a downgrade baseline, signed attestations and SIEM-native rules. This is not a claim to be first.</p>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Project</th><th>Overlaps</th><th>Does not do</th></tr></thead>
-      <tbody>
-        <tr><td>CBOMkit, Sonar Cryptography</td><td>CycloneDX CBOM</td><td>Source and image scanning only. No AI-BOM, drift, signing or SIEM.</td></tr>
-        <tr><td>cdxgen</td><td>BOMs, MCP and model discovery at build time</td><td>Not a continuous endpoint monitor. No SIEM content.</td></tr>
-        <tr><td>AC-Scanner</td><td>CBOM with run comparison</td><td>Remote scanner, AGPL-3.0. No AI-BOM, signing or SIEM.</td></tr>
-        <tr><td>Trusera ai-bom, agent-bom</td><td>AI-BOM from models and MCP configs</td><td>No CBOM, SIEM content or signed BOMs.</td></tr>
-        <tr><td>Community shadow-AI rules</td><td>SIEM rules for unapproved AI</td><td>Detection only. No BOM output or signing.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+    <section id="compare">
+      <div class="kicker">Landscape</div>
+      <h2>How it differs</h2>
+      <p class="lead">Found in a November 2026 search that was broad but not exhaustive: to our knowledge, no open-source project combines endpoint collection, CBOM plus AI-BOM, a downgrade baseline, signed attestations and SIEM-native rules. This is not a claim to be first.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Project</th><th>Overlaps</th><th>Does not do</th></tr></thead>
+          <tbody>
+            <tr><td>CBOMkit, Sonar Cryptography</td><td>CycloneDX CBOM</td><td>Source and image scanning only. No AI-BOM, drift, signing or SIEM.</td></tr>
+            <tr><td>cdxgen</td><td>BOMs, MCP and model discovery at build time</td><td>Not a continuous endpoint monitor. No SIEM content.</td></tr>
+            <tr><td>AC-Scanner</td><td>CBOM with run comparison</td><td>Remote scanner, AGPL-3.0. No AI-BOM, signing or SIEM.</td></tr>
+            <tr><td>Trusera ai-bom, agent-bom</td><td>AI-BOM from models and MCP configs</td><td>No CBOM, SIEM content or signed BOMs.</td></tr>
+            <tr><td>Community shadow-AI rules</td><td>SIEM rules for unapproved AI</td><td>Detection only. No BOM output or signing.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-<section id="limits">
-  <h2>Honest limits</h2>
-  <div class="note">
-    Post-quantum TLS status depends on what the probing client can negotiate. SSH status uses <code>sshd -T</code> only as root.
-    tesserabom never launches MCP servers, so it pins the configured launch spec but cannot see a server change what it advertises.
-    Attestations use Ed25519, a classical signature. the 5.x series and a remote agent reporting to a separate manager are untested.
-    Compliance tags are lookup aids, not statements of compliance.
-  </div>
-</section>
-</main>
+    <section id="limits">
+      <div class="kicker">Transparency</div>
+      <h2>Honest limits</h2>
+      <div class="note"><ul style="margin:0;padding-left:18px">
+        <li>Post-quantum TLS status depends on what the probing client can negotiate.</li>
+        <li>SSH status uses <code>sshd -T</code> only as root.</li>
+        <li>tesserabom never launches MCP servers, so it pins the configured launch spec but cannot see a server change what it advertises.</li>
+        <li>Attestations use Ed25519, a classical signature.</li>
+        <li>The 5.x series and a remote agent reporting to a separate manager are untested.</li>
+        <li>Compliance tags are lookup aids, not statements of compliance.</li>
+      </ul></div>
+    </section>
 
-<footer>
-  <div class="wrap">
-    <p>tesserabom is open source under Apache-2.0.
+    <footer>tesserabom is open source under Apache-2.0.
       <a href="https://github.com/sunilgentyala/tesserabom">Source</a> &middot;
       <a href="https://github.com/sunilgentyala/tesserabom/blob/main/SECURITY.md">Security policy</a> &middot;
-      <a href="https://github.com/sunilgentyala/tesserabom/blob/main/CHANGELOG.md">Changelog</a></p>
+      <a href="https://github.com/sunilgentyala/tesserabom/blob/main/CHANGELOG.md">Changelog</a>
+    </footer>
   </div>
-</footer>
+</main>
+
+<script>
+(function () {
+  var REPO = "sunilgentyala/tesserabom";
+  var $ = function (s) { return document.querySelector(s); };
+
+  /* theme */
+  var root = document.documentElement;
+  try { var t = localStorage.getItem("tb-theme"); if (t) root.setAttribute("data-theme", t); } catch (e) {}
+  $("#theme").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("tb-theme", next); } catch (e) {}
+  });
+
+  /* mobile menu */
+  $("#menu").addEventListener("click", function () { $("#side").classList.toggle("open"); });
+  $("#nav").addEventListener("click", function () { $("#side").classList.remove("open"); });
+
+  /* mosaic */
+  var cls = ["a", "b", "c", "d", "", "", ""], m = $("#mosaic"), html = "";
+  for (var i = 0; i < 24; i++) {
+    var c = cls[Math.floor(Math.random() * cls.length)];
+    html += '<i class="' + c + '" style="animation-delay:' + (Math.random() * 4).toFixed(2) + 's"></i>';
+  }
+  m.innerHTML = html;
+
+  /* scrollspy */
+  var links = [].slice.call(document.querySelectorAll("#nav a[href^='#']"));
+  var secs = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function spy() {
+    var y = window.scrollY + 120, idx = 0;
+    secs.forEach(function (s, i) { if (s && s.offsetTop <= y) idx = i; });
+    links.forEach(function (a, i) { a.classList.toggle("on", i === idx); });
+    $("#crumb").textContent = links[idx].textContent;
+  }
+  window.addEventListener("scroll", spy, { passive: true }); spy();
+
+  /* copy buttons */
+  [].forEach.call(document.querySelectorAll(".copy"), function (b) {
+    b.addEventListener("click", function () {
+      var txt = document.getElementById(b.getAttribute("data-copy")).innerText;
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () {
+        b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+      }, function () { b.textContent = "Select and copy"; });
+    });
+  });
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function row(k, v) { return '<div class="row"><span class="k">' + k + '</span><span class="v">' + v + "</span></div>"; }
+  function tag(kind, txt) { return '<span class="tag ' + kind + '">' + esc(txt) + "</span>"; }
+  function ago(iso) {
+    var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+    if (s < 90) return "just now";
+    if (s < 5400) return Math.round(s / 60) + " min ago";
+    if (s < 129600) return Math.round(s / 3600) + " h ago";
+    return Math.round(s / 86400) + " d ago";
+  }
+  function get(path) {
+    return fetch("https://api.github.com/repos/" + REPO + path, { headers: { Accept: "application/vnd.github+json" } })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+
+  /* live GitHub panel */
+  function loadGh() {
+    Promise.allSettled([get(""), get("/releases?per_page=1"), get("/actions/runs?per_page=1&branch=main"), get("/commits?per_page=1")])
+      .then(function (r) {
+        var repo = r[0].value, rel = r[1].value && r[1].value[0], run = r[2].value && r[2].value.workflow_runs && r[2].value.workflow_runs[0], com = r[3].value && r[3].value[0];
+        var h = "";
+        if (rel) {
+          var dl = (rel.assets || []).reduce(function (n, a) { return n + (a.download_count || 0); }, 0);
+          h += row("Latest release", '<a href="' + esc(rel.html_url) + '">' + esc(rel.tag_name) + "</a> " + (rel.prerelease ? tag("warn", "pre-release") : tag("ok", "stable")));
+          h += row("Published", esc(ago(rel.published_at)) + " &middot; " + (rel.assets || []).length + " assets, " + dl + " downloads");
+          $("#st-rel").textContent = rel.tag_name;
+        } else { h += row("Latest release", tag("idle", "unavailable")); $("#st-rel").textContent = "n/a"; }
+        if (run) {
+          var kind = run.conclusion === "success" ? "ok" : run.status !== "completed" ? "warn" : "bad";
+          h += row("CI on main", tag(kind, run.status === "completed" ? run.conclusion : run.status) + ' <a href="' + esc(run.html_url) + '">' + esc(run.name) + "</a>");
+          h += row("CI finished", esc(ago(run.updated_at)));
+        } else { h += row("CI on main", tag("idle", "unavailable")); }
+        if (com) { h += row("Last commit", esc(ago(com.commit.author.date)) + " &middot; <span class='mono'>" + esc(com.sha.slice(0, 7)) + "</span>"); }
+        if (repo) { h += row("Stars / forks / issues", repo.stargazers_count + " / " + repo.forks_count + " / " + repo.open_issues_count); }
+        $("#gh-rows").innerHTML = h;
+        var ok = r.some(function (x) { return x.status === "fulfilled"; });
+        $("#gh-when").textContent = ok ? "updated " + new Date().toLocaleTimeString() : "GitHub unreachable";
+        $("#topstatus").textContent = ok ? "live from GitHub" : "GitHub unreachable";
+      });
+  }
+  loadGh(); setInterval(loadGh, 120000);
+
+  /* live browser crypto probe */
+  function probe() {
+    var rows = [], s = window.crypto && crypto.subtle;
+    rows.push(row("Secure context", location.protocol === "https:" || location.hostname === "localhost" ? tag("ok", "yes") : tag("bad", "no")));
+    var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+    var proto = nav && nav.nextHopProtocol;
+    rows.push(row("Page transport", proto ? esc(proto === "h3" ? "HTTP/3 over QUIC (TLS 1.3)" : proto === "h2" ? "HTTP/2 (TLS 1.2 or 1.3)" : proto) : tag("idle", "not exposed")));
+    var tests = [
+      ["Ed25519 (signatures)", { name: "Ed25519" }, ["sign", "verify"], "quantum"],
+      ["ECDSA P-256", { name: "ECDSA", namedCurve: "P-256" }, ["sign", "verify"], "quantum"],
+      ["X25519 (key agreement)", { name: "X25519" }, ["deriveBits"], "quantum"],
+      ["AES-256-GCM", { name: "AES-GCM", length: 256 }, ["encrypt", "decrypt"], "safe"],
+      ["ML-KEM-768 (post-quantum)", { name: "ML-KEM-768" }, ["encapsulateBits", "decapsulateBits"], "pq"],
+      ["ML-DSA-65 (post-quantum)", { name: "ML-DSA-65" }, ["sign", "verify"], "pq"]
+    ];
+    if (!s) { $("#bx-rows").innerHTML = rows.join("") + row("WebCrypto", tag("bad", "unavailable")); return; }
+    Promise.all(tests.map(function (t) {
+      return s.generateKey(t[1], true, t[2]).then(function () { return true; }, function () { return false; });
+    })).then(function (res) {
+      var vuln = 0;
+      tests.forEach(function (t, i) {
+        var label;
+        if (!res[i]) label = tag("idle", "not supported");
+        else if (t[3] === "quantum") { vuln++; label = tag("warn", "works, quantum-vulnerable"); }
+        else label = tag("ok", t[3] === "pq" ? "works, post-quantum" : "works, quantum-safe");
+        rows.push(row(t[0], label));
+      });
+      var conn = navigator.connection;
+      if (conn) rows.push(row("Network", esc((conn.effectiveType || "?") + (conn.rtt ? ", " + conn.rtt + " ms RTT" : ""))));
+      rows.push(row("Verdict", vuln > 0 && !res[4] && !res[5] ? tag("warn", "classical only, PQC migration pending") : tag("ok", "post-quantum primitives available")));
+      $("#bx-rows").innerHTML = rows.join("");
+      $("#bx-when").textContent = "probed " + new Date().toLocaleTimeString();
+    });
+  }
+  probe(); setInterval(probe, 30000);
+})();
+</script>
 </body>
 </html>
