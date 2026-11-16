@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from cryptoai_inventory import attest, bom, drift
+from tesserabom import attest, bom, drift
 
 
 def tls(version="TLSv1.3", pq=True):
@@ -80,7 +80,7 @@ def test_bom_validates_against_official_schema(cert_dir, tmp_path):
         pytest.skip("set CYCLONEDX_SCHEMA_DIR to the CycloneDX schema directory")
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
     from validate_cyclonedx import main as validate
-    from cryptoai_inventory import ai, crypto
+    from tesserabom import ai, crypto
     c = crypto.collect([str(cert_dir)], [], [])
     a = ai.collect([], [], 1000)
     cb, ab = tmp_path / "c.json", tmp_path / "a.json"

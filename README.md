@@ -1,6 +1,6 @@
 <div align="center">
 
-# wazuh-cryptoai-inventory
+# tesserabom
 
 **Know which cryptography and which AI is actually running on your endpoints, and get alerted the moment it drifts.**
 
@@ -34,7 +34,7 @@ This add-on fills that gap with one small, dependency-light endpoint collector t
 ```mermaid
 flowchart LR
   subgraph Endpoint
-    A[cryptoai-inventory scan] --> B[(cbom.json)]
+    A[tesserabom scan] --> B[(cbom.json)]
     A --> C[(aibom.json)]
     A --> D[baseline.json]
     A -->|Ed25519 DSSE| E[(*.dsse.json)]
@@ -59,14 +59,14 @@ flowchart LR
 ```bash
 pip install .                       # requires Python 3.9+ and the cryptography package
 
-cryptoai-inventory keygen --dir /etc/cryptoai          # once per fleet or per host
-cryptoai-inventory scan \
-  --out /var/lib/cryptoai/out \
-  --baseline /var/lib/cryptoai/baseline.json \
-  --sign-key /etc/cryptoai/cryptoai-signing.key \
+tesserabom keygen --dir /etc/tesserabom          # once per fleet or per host
+tesserabom scan \
+  --out /var/lib/tesserabom/out \
+  --baseline /var/lib/tesserabom/baseline.json \
+  --sign-key /etc/tesserabom/tesserabom-signing.key \
   --tls-port 443 --tls-port 8443
 
-cryptoai-inventory verify /var/lib/cryptoai/out/cbom.dsse.json --pub /etc/cryptoai/cryptoai-signing.pub
+tesserabom verify /var/lib/tesserabom/out/cbom.dsse.json --pub /etc/tesserabom/tesserabom-signing.pub
 ```
 
 Useful options: `--cert-dir`, `--model-dir`, `--mcp-config` (each replaces the defaults), `--all-users` (inspect every
@@ -75,12 +75,12 @@ user home, needed when the agent runs as root or SYSTEM), `--hash-limit-mb`, `--
 Example output line:
 
 ```json
-{"cryptoai":{"event":"finding","host":"web01","tool_version":"0.1.1","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
+{"tesserabom":{"event":"finding","host":"web01","tool_version":"0.2.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
 ```
 
 ## Wazuh integration
 
-1. Copy `wazuh/decoders/cryptoai_decoders.xml` and `wazuh/rules/cryptoai_rules.xml` to the manager's
+1. Copy `wazuh/decoders/tesserabom_decoders.xml` and `wazuh/rules/tesserabom_rules.xml` to the manager's
    `etc/decoders/` and `etc/rules/`, then restart the manager.
 2. Add `wazuh/agent/ossec-agent-snippet.xml` to the agent configuration. It runs the scan every 12 hours through the
    command wodle. Depending on your Wazuh version, agents may need remote commands enabled for centrally pushed

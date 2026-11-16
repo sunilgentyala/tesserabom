@@ -7,9 +7,9 @@ build/
 dist/
 
 # Never commit scan output, baselines or signing keys: they describe real hosts.
-cryptoai-out/
+tesserabom-out/
 *.dsse.json
 baseline.json
-cryptoai-signing.key
-cryptoai-signing.pub
+tesserabom-signing.key
+tesserabom-signing.pub
 *.key

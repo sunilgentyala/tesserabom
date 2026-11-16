@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+Renamed the project to **tesserabom**. This is a breaking change.
+
+- Python package, CLI command and PyPI-style name: `tesserabom`
+- Log JSON namespace and Wazuh field names: `tesserabom.*` (was `cryptoai.*`)
+- Command wodle tag: `tesserabom`; rule and decoder files: `tesserabom_rules.xml`, `tesserabom_decoders.xml`
+- Signing key passphrase variable: `TESSERABOM_KEY_PASSPHRASE`
+- Rule IDs 100900 to 100999 are unchanged
+
 ## 0.1.1
 
 - Fix: decoders and rules did not fire on a real Wazuh manager. Wrapped command-wodle lines are now parsed by a child

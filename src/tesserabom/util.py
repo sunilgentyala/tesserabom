@@ -67,7 +67,7 @@ def atomic_write_private(path: str, data: str) -> None:
     """Write via temp file + rename, mode 0600 where the OS supports it."""
     directory = os.path.dirname(os.path.abspath(path)) or "."
     os.makedirs(directory, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-cryptoai-")
+    fd, tmp = tempfile.mkstemp(dir=directory, prefix=".tmp-tesserabom-")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             fh.write(data)

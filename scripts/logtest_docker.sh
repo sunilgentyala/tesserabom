@@ -9,7 +9,7 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 
 IMAGE="${WAZUH_IMAGE:-wazuh/wazuh-manager:4.14.10}"
-NAME="cryptoai-logtest-$$"
+NAME="tesserabom-logtest-$$"
 EXPECTED=(100903 100910 100913 100902)
 ROOT="$(cd "$(dirname "$0")/.." && (pwd -W 2>/dev/null || pwd))"
 
@@ -22,9 +22,9 @@ for _ in $(seq 1 40); do
   sleep 3
 done
 
-docker cp "$ROOT/wazuh/decoders/cryptoai_decoders.xml" "$NAME:/var/ossec/etc/decoders/cryptoai_decoders.xml"
-docker cp "$ROOT/wazuh/rules/cryptoai_rules.xml" "$NAME:/var/ossec/etc/rules/cryptoai_rules.xml"
-docker exec "$NAME" bash -c "chown wazuh:wazuh /var/ossec/etc/decoders/cryptoai_decoders.xml /var/ossec/etc/rules/cryptoai_rules.xml"
+docker cp "$ROOT/wazuh/decoders/tesserabom_decoders.xml" "$NAME:/var/ossec/etc/decoders/tesserabom_decoders.xml"
+docker cp "$ROOT/wazuh/rules/tesserabom_rules.xml" "$NAME:/var/ossec/etc/rules/tesserabom_rules.xml"
+docker exec "$NAME" bash -c "chown wazuh:wazuh /var/ossec/etc/decoders/tesserabom_decoders.xml /var/ossec/etc/rules/tesserabom_rules.xml"
 
 if docker exec "$NAME" /var/ossec/bin/wazuh-analysisd -t 2>&1 | grep -E "ERROR|CRITICAL"; then
   echo "FAIL: Wazuh rejected the configuration" >&2

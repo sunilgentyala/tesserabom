@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from . import __version__
 
 SPEC_VERSION = "1.6"
-NS = "cryptoai-inventory:"
+NS = "tesserabom:"
 
 
 def _prop(name: str, value: Any) -> Dict[str, str]:
@@ -26,7 +26,7 @@ def _header(host: str, now: Optional[dt.datetime]) -> Dict[str, Any]:
         "metadata": {
             "timestamp": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "tools": {"components": [{
-                "type": "application", "name": "wazuh-cryptoai-inventory", "version": __version__}]},
+                "type": "application", "name": "tesserabom", "version": __version__}]},
             "component": {"type": "device", "name": host, "bom-ref": "host:" + host},
         },
     }

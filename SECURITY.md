@@ -18,7 +18,7 @@ written to be a poor attack target and a poor data leak.
 | Hostile files | Reads are size-capped, symlinks are not followed, directory walks have depth and file-count caps, and model files are only hashed up to a size limit. Malformed JSON, X.509 and config files are ignored, not trusted. |
 | Log injection | Findings are serialized with `json.dumps`, so untrusted strings cannot break out of a log line. |
 | Output exposure | BOMs, baselines and keys are written atomically with mode 0600 where the OS supports it. |
-| Signing key handling | Ed25519 keys are refused if group or world accessible (POSIX). Keys can be encrypted with a passphrase from `CRYPTOAI_KEY_PASSPHRASE`. `keygen` never overwrites an existing key. |
+| Signing key handling | Ed25519 keys are refused if group or world accessible (POSIX). Keys can be encrypted with a passphrase from `TESSERABOM_KEY_PASSPHRASE`. `keygen` never overwrites an existing key. |
 
 ## Known limitations
 

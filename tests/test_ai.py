@@ -1,6 +1,6 @@
 import json
 
-from cryptoai_inventory import ai
+from tesserabom import ai
 
 
 def test_models_flagged_and_hashed(tmp_path):

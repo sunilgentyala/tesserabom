@@ -15,7 +15,7 @@ Re-check anything marked **Unconfirmed** against the primary source before relyi
 | CycloneDX 1.7 / ECMA-424 | Possible future target | **Unconfirmed.** Field-level changes were not reviewed. |
 | SPDX 3.0 AI profile, CISA "SBOM for AI" minimum elements | Possible future export | **Unconfirmed.** Publication date and field list were not retrieved. |
 
-## Regulatory tags in `wazuh/rules/cryptoai_rules.xml`
+## Regulatory tags in `wazuh/rules/tesserabom_rules.xml`
 
 | Tag | Source | Status |
 |---|---|---|

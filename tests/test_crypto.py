@@ -6,7 +6,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 
 from conftest import make_cert, pem
-from cryptoai_inventory import crypto
+from tesserabom import crypto
 
 
 def test_scan_cert_dir_finds_only_certs(cert_dir):

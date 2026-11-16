@@ -14,22 +14,22 @@ from typing import Any, Dict, List, Optional
 from . import __version__, ai, attest, bom, crypto, drift
 from .util import atomic_write_private
 
-SCHEMA = "cryptoai/1"
+SCHEMA = "tesserabom/1"
 
 
 def _log(event: str, host: str, **fields: Any) -> str:
     body: Dict[str, Any] = {"event": event, "host": host, "tool_version": __version__}
     body.update(fields)
-    return json.dumps({"cryptoai": body}, separators=(",", ":"), default=str)
+    return json.dumps({"tesserabom": body}, separators=(",", ":"), default=str)
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="cryptoai-inventory", description=__doc__)
+    p = argparse.ArgumentParser(prog="tesserabom", description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("scan", help="inventory crypto and AI assets on this endpoint")
-    s.add_argument("--out", default="cryptoai-out", help="directory for cbom.json and aibom.json")
+    s.add_argument("--out", default="tesserabom-out", help="directory for cbom.json and aibom.json")
     s.add_argument("--cert-dir", action="append", help="certificate directory (repeatable; replaces defaults)")
     s.add_argument("--tls-port", action="append", type=int,
                    help="loopback TLS port to probe (repeatable, default 443 and 8443)")

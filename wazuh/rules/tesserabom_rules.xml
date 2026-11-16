@@ -1,0 +1,137 @@
+<!-- tesserabom rules. IDs 100900-100999 are reserved for this add-on. -->
+<!-- Compliance groups are lookup tags for dashboards and reports. They are not a statement of compliance. -->
+<group name="tesserabom,">
+  <!-- Wrapped form: the command wodle prefixes output with "ossec: output: 'tag': ". The child decoder in
+       tesserabom_decoders.xml parses the JSON, so this rule anchors on the decoded field. -->
+  <rule id="100900" level="0">
+    <decoded_as>ossec</decoded_as>
+    <field name="tesserabom.event">\.+</field>
+    <description>tesserabom output (command wodle).</description>
+  </rule>
+  <!-- Bare form: one JSON object per line, decoded by the built-in json decoder (localfile or integration). -->
+  <rule id="100901" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="tesserabom.event">\.+</field>
+    <description>tesserabom output (JSON log).</description>
+  </rule>
+  <rule id="100902" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.event">^summary$</field>
+    <description>tesserabom scan summary.</description>
+    <group>tesserabom_summary,</group>
+  </rule>
+  <rule id="100903" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^cert_expired$</field>
+    <description>Expired X.509 certificate in use: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art6,nydfs_500.15,dora_rts_2024_1774_art7,</group>
+  </rule>
+  <rule id="100904" level="7">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^cert_expiring$</field>
+    <description>X.509 certificate expires within 30 days: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art7,</group>
+  </rule>
+  <rule id="100905" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^cert_weak_signature$</field>
+    <description>Certificate signed with a broken hash (MD5 or SHA-1): $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art6,nydfs_500.15,</group>
+  </rule>
+  <rule id="100906" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^cert_weak_key$</field>
+    <description>Certificate public key below minimum strength: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art6,nydfs_500.15,</group>
+  </rule>
+  <rule id="100907" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^tls_legacy_version$</field>
+    <description>TLS endpoint negotiated a protocol older than TLS 1.2: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art6,nydfs_500.15,</group>
+  </rule>
+  <rule id="100908" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^tls_no_pq_hybrid$</field>
+    <description>TLS endpoint negotiated a classical-only key exchange: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,pqc_readiness,</group>
+  </rule>
+  <rule id="100909" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^ssh_no_pq_kex$</field>
+    <description>SSH server key exchange has no post-quantum hybrid: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,pqc_readiness,</group>
+  </rule>
+  <rule id="100910" level="12">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^crypto_downgrade$</field>
+    <description>Cryptographic downgrade against the recorded baseline: $(tesserabom.detail)</description>
+    <group>pci_dss_12.3.3,dora_rts_2024_1774_art6,nydfs_500.15,crypto_agility,</group>
+  </rule>
+  <rule id="100911" level="7">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^model_unsafe_serialization$</field>
+    <description>Local model file uses a pickle-based serialization format: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,</group>
+  </rule>
+  <rule id="100912" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^model_header_mismatch$</field>
+    <description>Local model file header does not match its extension: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,</group>
+  </rule>
+  <rule id="100913" level="7">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^mcp_unpinned_package$</field>
+    <description>MCP server launched from an unpinned package: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,mcp,</group>
+  </rule>
+  <rule id="100914" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^mcp_cleartext_remote$</field>
+    <description>MCP server reached over cleartext HTTP: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,mcp,</group>
+  </rule>
+  <rule id="100915" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^mcp_remote_server$</field>
+    <description>MCP server connects to a remote host: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,mcp,</group>
+  </rule>
+  <rule id="100916" level="7">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^mcp_secret_in_config$</field>
+    <description>MCP server credentials stored in a config file: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,mcp,</group>
+  </rule>
+  <rule id="100917" level="10">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^ai_runtime_exposed$</field>
+    <description>Local AI runtime configured to listen beyond loopback: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,</group>
+  </rule>
+  <rule id="100918" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^ai_runtime_present$</field>
+    <description>Local AI runtime detected: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,ai_bom,</group>
+  </rule>
+  <rule id="100919" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^drift_added$</field>
+    <description>New asset appeared since the baseline: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,drift,</group>
+  </rule>
+  <rule id="100920" level="3">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^drift_removed$</field>
+    <description>Asset disappeared since the baseline: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,drift,</group>
+  </rule>
+  <rule id="100921" level="7">
+    <if_sid>100900,100901</if_sid>
+    <field name="tesserabom.finding">^drift_changed$</field>
+    <description>Asset changed since the baseline: $(tesserabom.detail)</description>
+    <group>dora_art8_4,nydfs_500.13,drift,</group>
+  </rule>
+</group>

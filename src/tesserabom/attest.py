@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from .util import atomic_write_private
 
 PAYLOAD_TYPE = "application/vnd.cyclonedx+json"
-PASSPHRASE_ENV = "CRYPTOAI_KEY_PASSPHRASE"  # nosec B105
+PASSPHRASE_ENV = "TESSERABOM_KEY_PASSPHRASE"  # nosec B105
 
 
 def _pae(payload_type: str, payload: bytes) -> bytes:
@@ -38,8 +38,8 @@ def keyid_for(public_key: ed25519.Ed25519PublicKey) -> str:
 
 def keygen(directory: str) -> Dict[str, str]:
     os.makedirs(directory, exist_ok=True)
-    priv_path = os.path.join(directory, "cryptoai-signing.key")
-    pub_path = os.path.join(directory, "cryptoai-signing.pub")
+    priv_path = os.path.join(directory, "tesserabom-signing.key")
+    pub_path = os.path.join(directory, "tesserabom-signing.pub")
     if os.path.exists(priv_path):
         raise FileExistsError("refusing to overwrite " + priv_path)
     key = ed25519.Ed25519PrivateKey.generate()

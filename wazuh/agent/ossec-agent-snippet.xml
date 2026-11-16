@@ -1,8 +1,8 @@
 <!-- Add to the agent ossec.conf (or the centralized agent.conf). -->
 <wodle name="command">
   <disabled>no</disabled>
-  <tag>cryptoai-inventory</tag>
-  <command>cryptoai-inventory scan --out /var/lib/cryptoai/out --baseline /var/lib/cryptoai/baseline.json --sign-key /etc/cryptoai/cryptoai-signing.key</command>
+  <tag>tesserabom</tag>
+  <command>tesserabom scan --out /var/lib/tesserabom/out --baseline /var/lib/tesserabom/baseline.json --sign-key /etc/tesserabom/tesserabom-signing.key</command>
   <interval>12h</interval>
   <run_on_start>yes</run_on_start>
   <timeout>900</timeout>
