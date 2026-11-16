@@ -1,0 +1,8 @@
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"cert_weak_key","severity":"medium","asset":"cert:e1003f49231aa54a4fb9cc371cf91c37","detail":"CN=legacy-batch.demo.internal uses RSA-1024"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:18443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"drift_added","severity":"info","asset":"cert:e1003f49231aa54a4fb9cc371cf91c37","detail":"cert added"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"drift_added","severity":"medium","asset":"model:db3c671c05fa344a07464f2db0c602a1","detail":"model added"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"drift_removed","severity":"info","asset":"cert:36768a48f6b9d83f37c8a3068f3750fd","detail":"cert removed"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"drift_changed","severity":"medium","asset":"mcp:mcp.json:tickets","detail":"mcp changed"}}
+{"tesserabom":{"event":"finding","host":"demo-host-01","tool_version":"0.3.0","finding":"drift_changed","severity":"medium","asset":"tls:127.0.0.1:18443","detail":"tls changed"}}
+{"tesserabom":{"event":"summary","host":"demo-host-01","tool_version":"0.3.0","findings":7,"certificates":2,"quantum_vulnerable_certs":2,"tls_endpoints":1,"models":2,"mcp_servers":2,"ai_runtimes":0}}

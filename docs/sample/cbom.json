@@ -1,0 +1,205 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "serialNumber": "urn:uuid:0abbe6e9-d2dd-4a50-9820-f7185fcac46a",
+ "version": 1,
+ "metadata": {
+  "timestamp": "2026-11-16T16:49:18Z",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "tesserabom",
+     "version": "0.3.0"
+    }
+   ]
+  },
+  "component": {
+   "type": "device",
+   "name": "demo-host-01",
+   "bom-ref": "host:demo-host-01"
+  }
+ },
+ "components": [
+  {
+   "type": "cryptographic-asset",
+   "name": "RSA-1024",
+   "bom-ref": "alg/RSA-1024",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke",
+     "classicalSecurityLevel": 80,
+     "nistQuantumSecurityLevel": 0,
+     "parameterSetIdentifier": "1024"
+    }
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "RSA-2048",
+   "bom-ref": "alg/RSA-2048",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke",
+     "classicalSecurityLevel": 112,
+     "nistQuantumSecurityLevel": 0,
+     "parameterSetIdentifier": "2048"
+    }
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "sha256WithRSAEncryption",
+   "bom-ref": "alg/sha256WithRSAEncryption",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "oid": "1.2.840.113549.1.1.11",
+    "algorithmProperties": {
+     "primitive": "signature",
+     "nistQuantumSecurityLevel": 0
+    }
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "CN=payments-api.demo.internal",
+   "bom-ref": "crypto/cert:4ad0aea71e7dc29c542e692fd731f455",
+   "cryptoProperties": {
+    "assetType": "certificate",
+    "certificateProperties": {
+     "subjectName": "CN=payments-api.demo.internal",
+     "issuerName": "CN=payments-api.demo.internal",
+     "notValidBefore": "2026-11-01T00:00:00+00:00",
+     "notValidAfter": "2027-08-28T00:00:00+00:00",
+     "signatureAlgorithmRef": "alg/sha256WithRSAEncryption",
+     "subjectPublicKeyRef": "key/4ad0aea71e7dc29c542e692fd731f455",
+     "certificateFormat": "X.509"
+    }
+   },
+   "properties": [
+    {
+     "name": "tesserabom:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "tesserabom:source",
+     "value": "file:/opt/demo/certs/payments-api.pem"
+    },
+    {
+     "name": "tesserabom:sha256",
+     "value": "4ad0aea71e7dc29c542e692fd731f45545fc4a32f369cd943d9629ec851deb58"
+    },
+    {
+     "name": "tesserabom:is-ca",
+     "value": "false"
+    }
+   ]
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "CN=legacy-batch.demo.internal",
+   "bom-ref": "crypto/cert:e1003f49231aa54a4fb9cc371cf91c37",
+   "cryptoProperties": {
+    "assetType": "certificate",
+    "certificateProperties": {
+     "subjectName": "CN=legacy-batch.demo.internal",
+     "issuerName": "CN=legacy-batch.demo.internal",
+     "notValidBefore": "2026-11-01T00:00:00+00:00",
+     "notValidAfter": "2027-08-28T00:00:00+00:00",
+     "signatureAlgorithmRef": "alg/sha256WithRSAEncryption",
+     "subjectPublicKeyRef": "key/e1003f49231aa54a4fb9cc371cf91c37",
+     "certificateFormat": "X.509"
+    }
+   },
+   "properties": [
+    {
+     "name": "tesserabom:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "tesserabom:source",
+     "value": "file:/opt/demo/certs/legacy-batch.pem"
+    },
+    {
+     "name": "tesserabom:sha256",
+     "value": "e1003f49231aa54a4fb9cc371cf91c37ae50def6d217f72b4c4b7b49d83580b4"
+    },
+    {
+     "name": "tesserabom:is-ca",
+     "value": "false"
+    }
+   ]
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "tls:127.0.0.1:18443",
+   "bom-ref": "crypto/tls:127.0.0.1:18443",
+   "cryptoProperties": {
+    "assetType": "protocol",
+    "protocolProperties": {
+     "type": "tls",
+     "version": "1.2",
+     "cipherSuites": [
+      {
+       "name": "ECDHE-RSA-AES256-GCM-SHA384"
+      }
+     ]
+    }
+   },
+   "properties": [
+    {
+     "name": "tesserabom:host",
+     "value": "127.0.0.1"
+    },
+    {
+     "name": "tesserabom:port",
+     "value": "18443"
+    }
+   ]
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "public-key:CN=payments-api.demo.internal",
+   "bom-ref": "key/4ad0aea71e7dc29c542e692fd731f455",
+   "cryptoProperties": {
+    "assetType": "related-crypto-material",
+    "relatedCryptoMaterialProperties": {
+     "type": "public-key",
+     "algorithmRef": "alg/RSA-2048",
+     "size": 2048
+    }
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "name": "public-key:CN=legacy-batch.demo.internal",
+   "bom-ref": "key/e1003f49231aa54a4fb9cc371cf91c37",
+   "cryptoProperties": {
+    "assetType": "related-crypto-material",
+    "relatedCryptoMaterialProperties": {
+     "type": "public-key",
+     "algorithmRef": "alg/RSA-1024",
+     "size": 1024
+    }
+   }
+  },
+  {
+   "type": "library",
+   "name": "OpenSSL",
+   "version": "3.0.19",
+   "bom-ref": "lib/lib:openssl-python-runtime",
+   "properties": [
+    {
+     "name": "tesserabom:source",
+     "value": "python-ssl-module:3.14.4"
+    },
+    {
+     "name": "tesserabom:ml-kem-capable",
+     "value": "false"
+    }
+   ]
+  }
+ ]
+}

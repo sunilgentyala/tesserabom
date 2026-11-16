@@ -1,0 +1,112 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "serialNumber": "urn:uuid:7efd383e-8c6e-4bbf-ab75-4b7ef5d57713",
+ "version": 1,
+ "metadata": {
+  "timestamp": "2026-11-16T16:49:17Z",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "tesserabom",
+     "version": "0.3.0"
+    }
+   ]
+  },
+  "component": {
+   "type": "device",
+   "name": "demo-host-01",
+   "bom-ref": "host:demo-host-01"
+  }
+ },
+ "components": [
+  {
+   "type": "machine-learning-model",
+   "name": "support-assistant-7b-q4.gguf",
+   "bom-ref": "model:3e4a77f7aad01b2807b3ad60543c6f3d",
+   "properties": [
+    {
+     "name": "tesserabom:format",
+     "value": "gguf"
+    },
+    {
+     "name": "tesserabom:path",
+     "value": "/opt/demo/models/support-assistant-7b-q4.gguf"
+    },
+    {
+     "name": "tesserabom:size-bytes",
+     "value": "4104"
+    },
+    {
+     "name": "tesserabom:serialization-risk",
+     "value": "false"
+    },
+    {
+     "name": "tesserabom:header-matches-extension",
+     "value": "true"
+    }
+   ],
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "3e4a77f7aad01b2807b3ad60543c6f3d75af4b7a8791a3f69f0dfbec6d17ec13"
+    }
+   ]
+  }
+ ],
+ "services": [
+  {
+   "bom-ref": "mcp:mcp.json:filesystem",
+   "name": "filesystem",
+   "properties": [
+    {
+     "name": "tesserabom:protocol",
+     "value": "mcp"
+    },
+    {
+     "name": "tesserabom:config",
+     "value": "mcp.json"
+    },
+    {
+     "name": "tesserabom:spec-sha256",
+     "value": "bd7ec7c2964b45dc83be613d3e7ede16b8c354bdbbaa4c0203b50a2e74729626"
+    },
+    {
+     "name": "tesserabom:command",
+     "value": "npx"
+    },
+    {
+     "name": "tesserabom:args",
+     "value": "-y @modelcontextprotocol/server-filesystem@1.2.0 /data/shared"
+    }
+   ]
+  },
+  {
+   "bom-ref": "mcp:mcp.json:tickets",
+   "name": "tickets",
+   "properties": [
+    {
+     "name": "tesserabom:protocol",
+     "value": "mcp"
+    },
+    {
+     "name": "tesserabom:config",
+     "value": "mcp.json"
+    },
+    {
+     "name": "tesserabom:spec-sha256",
+     "value": "499f37e750bfb34d85c636634a62147658a9fc9d21a512a3c4efdf1346eb58fb"
+    },
+    {
+     "name": "tesserabom:command",
+     "value": "python"
+    },
+    {
+     "name": "tesserabom:args",
+     "value": "-m tickets_mcp"
+    }
+   ]
+  }
+ ]
+}

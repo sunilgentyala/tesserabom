@@ -53,7 +53,7 @@
   .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); font-size:13px; color:var(--muted); }
   .iconbtn { width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; font-size:16px; }
   .menubtn { display:none; }
-  .content { padding:24px 28px 60px; max-width:1180px; }
+  .content { padding:24px 28px 60px; max-width:1180px; margin:0 auto; }
 
   /* hero */
   .hero { position:relative; overflow:hidden; border-radius:22px; padding:44px; color:#eaf2ff; background:radial-gradient(900px 400px at 85% 10%,rgba(56,189,248,.28),transparent 60%),radial-gradient(700px 400px at 0% 100%,rgba(129,140,248,.25),transparent 60%),linear-gradient(135deg,#0a1a3a,#0b2a4f 55%,#0a3a4a); box-shadow:var(--shadow); display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center; }
@@ -135,6 +135,30 @@
   .note li { margin:4px 0; }
   footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; }
 
+  /* sample viewer */
+  .tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .tabs button { padding:8px 14px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--muted); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+  .tabs button[aria-selected="true"] { background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
+  .term { background:var(--code-bg); color:#cfe0ff; border:1px solid var(--side-line); border-radius:14px; padding:14px; font-size:13px; line-height:1.55; min-height:160px; max-height:340px; overflow:auto; }
+  .term .ln { display:flex; gap:10px; align-items:baseline; padding:3px 0; animation:slide .25s ease-out; }
+  .term .ln .ts { color:#6b7c9c; flex:none; }
+  .term .ln .fd { color:#7dd3fc; flex:none; min-width:150px; }
+  .term .ln .dt { color:#cfe0ff; word-break:break-word; }
+  @keyframes slide { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  .sev { flex:none; min-width:64px; text-align:center; padding:0 8px; border-radius:6px; font-size:11px; font-weight:800; text-transform:uppercase; }
+  .sev.high { background:#f43f5e; color:#fff; } .sev.medium { background:#f59e0b; color:#111; } .sev.info { background:#334155; color:#e2e8f0; }
+  .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 12px; }
+  .btn2 { padding:8px 14px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; }
+  .btn2.primary { background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
+  .diff { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  .diffcol h4 { margin:0 0 8px; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .asset { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); margin-bottom:8px; font-size:14px; }
+  .asset small { color:var(--muted); display:block; font-size:12.5px; word-break:break-word; }
+  .asset.added { border-color:var(--ok); } .asset.removed { border-color:var(--bad); opacity:.8; } .asset.changed { border-color:var(--d); }
+  .scroll { max-height:420px; overflow:auto; }
+  .rawbox { max-height:420px; overflow:auto; }
+  [hidden] { display:none !important; }
+  @media (max-width:700px) { .diff { grid-template-columns:1fr; } .term .ln .fd { min-width:0; } }
   @media (max-width:1000px) {
     .hero { grid-template-columns:1fr; padding:28px; } .live { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,1fr); }
     .flow { grid-template-columns:1fr 1fr; } .step { border-radius:0 !important; }
@@ -155,6 +179,7 @@
   <nav id="nav">
     <a href="#overview" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a>
     <a href="#live"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Live data</a>
+    <a href="#sample"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Sample output</a>
     <a href="#features"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Inventories</a>
     <a href="#how"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 17h16M14 7l3-3m-3 3l3 3"/></svg>How it works</a>
     <a href="#start"><svg viewBox="0 0 24 24"><path d="M5 8l4 4-4 4M12 17h7"/></svg>Quick start</a>
@@ -218,6 +243,40 @@
           </div>
           <p class="small">Runs locally and sends nothing anywhere. It tests what this browser can actually do, and flags algorithms a quantum computer would break.</p>
         </div>
+      </div>
+    </section>
+
+    <section id="sample">
+      <div class="kicker">Real tool output</div>
+      <h2>Sample CBOM and drift alert viewer</h2>
+      <p class="lead">These files were produced by running tesserabom 0.3.0 twice on a controlled demo endpoint: a baseline scan, then a second scan after a TLS server dropped from 1.3 to 1.2, a certificate was replaced by a weaker one, a model was added, and an MCP server launch command changed. Nothing here is hand-written. Paths were rewritten to <code>/opt/demo</code> and the host renamed. Pick a tab, or replay the alert stream the SIEM would receive.</p>
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" aria-selected="true" data-t="drift">Drift alerts</button>
+        <button role="tab" aria-selected="false" data-t="cbom">CBOM</button>
+        <button role="tab" aria-selected="false" data-t="aibom">AI-BOM</button>
+        <button role="tab" aria-selected="false" data-t="raw">Raw JSON</button>
+      </div>
+      <div id="tab-drift">
+        <div class="toolbar"><button class="btn2 primary" id="replay">&#9654; Replay alert stream</button><span class="pill" id="sumpill">loading sample</span></div>
+        <div class="term mono" id="term" aria-live="polite"></div>
+        <div class="diff">
+          <div class="diffcol"><h4>Baseline scan</h4><div id="d-before"></div></div>
+          <div class="diffcol"><h4>Second scan (drift detected)</h4><div id="d-after"></div></div>
+        </div>
+      </div>
+      <div id="tab-cbom" hidden>
+        <div class="tablewrap scroll"><table><thead><tr><th>Asset</th><th>Type</th><th>Detail</th><th>Quantum</th></tr></thead><tbody id="cbom-rows"></tbody></table></div>
+      </div>
+      <div id="tab-aibom" hidden>
+        <div class="tablewrap scroll"><table><thead><tr><th>Asset</th><th>Kind</th><th>Detail</th><th>Fingerprint</th></tr></thead><tbody id="aibom-rows"></tbody></table></div>
+      </div>
+      <div id="tab-raw" hidden>
+        <div class="toolbar">
+          <button class="btn2" data-raw="cbom.json">cbom.json</button><button class="btn2" data-raw="aibom.json">aibom.json</button>
+          <button class="btn2" data-raw="findings.jsonl">findings.jsonl</button>
+          <a class="btn2" id="rawdl" href="sample/cbom.json" download>Download shown file</a>
+        </div>
+        <div class="codebox rawbox"><pre id="rawpre"><code>loading...</code></pre></div>
       </div>
     </section>
 
@@ -366,6 +425,90 @@ tesserabom diff old/cbom.json new/cbom.json</code></pre>
     return fetch("https://api.github.com/repos/" + REPO + path, { headers: { Accept: "application/vnd.github+json" } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
+
+  /* sample viewer */
+  var SAMPLE = {};
+  function loadFile(n) { return fetch("sample/" + n).then(function (r) { if (!r.ok) throw new Error(n); return n.slice(-5) === "jsonl" ? r.text() : r.json(); }); }
+  function prop(c, name) { var p = (c.properties || []).filter(function (x) { return x.name === "tesserabom:" + name; })[0]; return p ? p.value : ""; }
+  function jl(t) { return t.trim().split("\n").filter(Boolean).map(function (l) { return JSON.parse(l).tesserabom; }); }
+  function allComps(b) { return (b.components || []).concat(b.services || []); }
+  function describe(c) {
+    var cp = c.cryptoProperties || {}, t = cp.assetType;
+    if (t === "certificate") { var q = cp.certificateProperties; return ["certificate", "valid until " + q.notValidAfter.slice(0, 10) + ", " + q.signatureAlgorithmRef.replace("alg/", "")]; }
+    if (t === "protocol") { var pp = cp.protocolProperties; return ["protocol", "TLS " + pp.version + (pp.cipherSuites && pp.cipherSuites[0] ? ", " + pp.cipherSuites[0].name : "")]; }
+    if (t === "algorithm") { var ap = cp.algorithmProperties; return ["algorithm", ap.primitive + (ap.classicalSecurityLevel ? ", classical " + ap.classicalSecurityLevel + " bit" : "")]; }
+    if (t === "related-crypto-material") return ["public key", c.name.replace("public-key:", "")];
+    if (c.type === "library") return ["library", c.version || ""];
+    return [t || c.type, ""];
+  }
+  function qtag(c) {
+    var cp = c.cryptoProperties || {};
+    if (cp.algorithmProperties && cp.algorithmProperties.nistQuantumSecurityLevel === 0) return tag("bad", "level 0");
+    if (prop(c, "quantum-vulnerable") === "true") return tag("bad", "vulnerable");
+    if (cp.assetType === "protocol") return tag("warn", "classical KEX");
+    return tag("idle", "n/a");
+  }
+  function assetCard(name, sub, cls, badge) { return '<div class="asset ' + cls + '"><div>' + esc(name) + "<small>" + esc(sub) + "</small></div>" + (badge || "") + "</div>"; }
+  function snapshot(cb, ai) {
+    var m = {};
+    allComps(cb).concat(allComps(ai)).forEach(function (c) {
+      var id = c["bom-ref"].replace(/^crypto\//, "");
+      if (/^(cert|tls|model|mcp):/.test(id)) {
+        var cp = c.cryptoProperties || {}, sub = "";
+        if (cp.protocolProperties) sub = "TLS " + cp.protocolProperties.version;
+        else if (cp.certificateProperties) sub = "certificate, " + cp.certificateProperties.signatureAlgorithmRef.replace("alg/", "");
+        else if (c.type === "machine-learning-model") sub = "model file, SHA-256 " + (c.hashes ? c.hashes[0].content.slice(0, 12) : "") + "...";
+        else sub = "MCP server, runs " + prop(c, "command") + " " + prop(c, "args");
+        m[id] = { name: c.name, sub: sub };
+      }
+    });
+    return m;
+  }
+  function renderDrift() {
+    var f = SAMPLE.findings, base = snapshot(SAMPLE.cbomB, SAMPLE.aibomB), now = snapshot(SAMPLE.cbom, SAMPLE.aibom), st = {};
+    f.forEach(function (x) { if (!x.finding) return; if (x.finding.indexOf("drift_") === 0) st[x.asset] = x.finding.slice(6); if (x.finding === "crypto_downgrade") st[x.asset] = "changed"; });
+    $("#d-before").innerHTML = Object.keys(base).map(function (k) { var s = st[k]; return assetCard(base[k].name, base[k].sub, s === "removed" || s === "changed" ? s : "", s === "removed" ? tag("bad", "removed") : s === "changed" ? tag("warn", "changed") : ""); }).join("");
+    $("#d-after").innerHTML = Object.keys(now).map(function (k) { var s = st[k]; return assetCard(now[k].name, now[k].sub, s === "added" || s === "changed" ? s : "", s === "added" ? tag("ok", "new") : s === "changed" ? tag("warn", "changed") : ""); }).join("");
+    var sum = SAMPLE.base.filter(function (x) { return x.event === "summary"; })[0], s2 = f.filter(function (x) { return x.event === "summary"; })[0];
+    $("#sumpill").textContent = "baseline: " + sum.findings + " findings, second scan: " + s2.findings + " findings";
+  }
+  var rt = null;
+  function replay() {
+    var term = $("#term"); term.innerHTML = ""; clearTimeout(rt);
+    var items = SAMPLE.findings.filter(function (x) { return x.event === "finding"; }), i = 0, t0 = Date.now();
+    var order = { high: 0, medium: 1, info: 2 };
+    items.sort(function (a, b) { return order[a.severity] - order[b.severity]; });
+    (function next() {
+      if (i >= items.length) { term.insertAdjacentHTML("beforeend", '<div class="ln"><span class="ts">done</span><span class="dt">' + items.length + " events emitted, one JSON line each, ready for the SIEM command wodle</span></div>"); return; }
+      var x = items[i++], ts = new Date(t0 + i * 700).toLocaleTimeString();
+      term.insertAdjacentHTML("beforeend", '<div class="ln"><span class="ts">' + ts + '</span><span class="sev ' + x.severity + '">' + x.severity + '</span><span class="fd">' + esc(x.finding) + '</span><span class="dt">' + esc(x.detail) + " [" + esc(x.asset) + "]</span></div>");
+      term.scrollTop = term.scrollHeight; rt = setTimeout(next, 650);
+    })();
+  }
+  function renderCbom() {
+    $("#cbom-rows").innerHTML = SAMPLE.cbom.components.map(function (c) { var d = describe(c); return "<tr><td>" + esc(c.name) + "</td><td>" + esc(d[0]) + "</td><td>" + esc(d[1]) + "</td><td>" + qtag(c) + "</td></tr>"; }).join("");
+  }
+  function renderAibom() {
+    var h = SAMPLE.aibom.components.map(function (c) { return "<tr><td>" + esc(c.name) + "</td><td>model</td><td>" + esc(prop(c, "format").toUpperCase()) + ", " + esc(prop(c, "size-bytes")) + " bytes, header matches extension: " + esc(prop(c, "header-matches-extension")) + "</td><td class='mono'>" + esc(c.hashes[0].content.slice(0, 16)) + "...</td></tr>"; }).join("");
+    h += (SAMPLE.aibom.services || []).map(function (c) { return "<tr><td>" + esc(c.name) + "</td><td>MCP server</td><td>" + esc(prop(c, "command") + " " + prop(c, "args")) + "</td><td class='mono'>" + esc(prop(c, "spec-sha256").slice(0, 16)) + "...</td></tr>"; }).join("");
+    $("#aibom-rows").innerHTML = h;
+  }
+  function showRaw(n) {
+    var txt = n === "findings.jsonl" ? SAMPLE.findingsRaw : JSON.stringify(SAMPLE[n === "cbom.json" ? "cbom" : "aibom"], null, 1);
+    $("#rawpre").firstChild.textContent = txt; $("#rawdl").setAttribute("href", "sample/" + n);
+  }
+  Promise.all([loadFile("cbom.json"), loadFile("aibom.json"), loadFile("cbom-baseline.json"), loadFile("aibom-baseline.json"), loadFile("findings.jsonl"), loadFile("baseline-summary.jsonl")])
+    .then(function (r) {
+      SAMPLE = { cbom: r[0], aibom: r[1], cbomB: r[2], aibomB: r[3], findingsRaw: r[4], findings: jl(r[4]), base: jl(r[5]) };
+      renderDrift(); renderCbom(); renderAibom(); showRaw("cbom.json"); replay();
+    }).catch(function (e) { $("#sumpill").textContent = "sample viewer error: " + (e && e.message ? e.message : e); });
+  $("#replay").addEventListener("click", function () { if (SAMPLE.findings) replay(); });
+  $("#tabs").addEventListener("click", function (e) {
+    var t = e.target.getAttribute && e.target.getAttribute("data-t"); if (!t) return;
+    [].forEach.call(document.querySelectorAll("#tabs button"), function (b) { b.setAttribute("aria-selected", b === e.target ? "true" : "false"); });
+    ["drift", "cbom", "aibom", "raw"].forEach(function (n) { document.getElementById("tab-" + n).hidden = n !== t; });
+  });
+  [].forEach.call(document.querySelectorAll("[data-raw]"), function (b) { b.addEventListener("click", function () { if (SAMPLE.cbom) showRaw(b.getAttribute("data-raw")); }); });
 
   /* live GitHub panel */
   function loadGh() {

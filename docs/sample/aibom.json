@@ -1,0 +1,145 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "serialNumber": "urn:uuid:0835dd6a-0061-4144-aec0-dcb78e32ae00",
+ "version": 1,
+ "metadata": {
+  "timestamp": "2026-11-16T16:49:18Z",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "tesserabom",
+     "version": "0.3.0"
+    }
+   ]
+  },
+  "component": {
+   "type": "device",
+   "name": "demo-host-01",
+   "bom-ref": "host:demo-host-01"
+  }
+ },
+ "components": [
+  {
+   "type": "machine-learning-model",
+   "name": "support-assistant-7b-q4.gguf",
+   "bom-ref": "model:3e4a77f7aad01b2807b3ad60543c6f3d",
+   "properties": [
+    {
+     "name": "tesserabom:format",
+     "value": "gguf"
+    },
+    {
+     "name": "tesserabom:path",
+     "value": "/opt/demo/models/support-assistant-7b-q4.gguf"
+    },
+    {
+     "name": "tesserabom:size-bytes",
+     "value": "4104"
+    },
+    {
+     "name": "tesserabom:serialization-risk",
+     "value": "false"
+    },
+    {
+     "name": "tesserabom:header-matches-extension",
+     "value": "true"
+    }
+   ],
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "3e4a77f7aad01b2807b3ad60543c6f3d75af4b7a8791a3f69f0dfbec6d17ec13"
+    }
+   ]
+  },
+  {
+   "type": "machine-learning-model",
+   "name": "fraud-scorer-13b-q8.gguf",
+   "bom-ref": "model:db3c671c05fa344a07464f2db0c602a1",
+   "properties": [
+    {
+     "name": "tesserabom:format",
+     "value": "gguf"
+    },
+    {
+     "name": "tesserabom:path",
+     "value": "/opt/demo/models/fraud-scorer-13b-q8.gguf"
+    },
+    {
+     "name": "tesserabom:size-bytes",
+     "value": "4104"
+    },
+    {
+     "name": "tesserabom:serialization-risk",
+     "value": "false"
+    },
+    {
+     "name": "tesserabom:header-matches-extension",
+     "value": "true"
+    }
+   ],
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "db3c671c05fa344a07464f2db0c602a179f27d065dfd20e4df55af5ddac10377"
+    }
+   ]
+  }
+ ],
+ "services": [
+  {
+   "bom-ref": "mcp:mcp.json:filesystem",
+   "name": "filesystem",
+   "properties": [
+    {
+     "name": "tesserabom:protocol",
+     "value": "mcp"
+    },
+    {
+     "name": "tesserabom:config",
+     "value": "mcp.json"
+    },
+    {
+     "name": "tesserabom:spec-sha256",
+     "value": "bd7ec7c2964b45dc83be613d3e7ede16b8c354bdbbaa4c0203b50a2e74729626"
+    },
+    {
+     "name": "tesserabom:command",
+     "value": "npx"
+    },
+    {
+     "name": "tesserabom:args",
+     "value": "-y @modelcontextprotocol/server-filesystem@1.2.0 /data/shared"
+    }
+   ]
+  },
+  {
+   "bom-ref": "mcp:mcp.json:tickets",
+   "name": "tickets",
+   "properties": [
+    {
+     "name": "tesserabom:protocol",
+     "value": "mcp"
+    },
+    {
+     "name": "tesserabom:config",
+     "value": "mcp.json"
+    },
+    {
+     "name": "tesserabom:spec-sha256",
+     "value": "4af69b7cbc88bb0c52de42770a3c564c12f72ff80aa87210df55515e5737cee5"
+    },
+    {
+     "name": "tesserabom:command",
+     "value": "node"
+    },
+    {
+     "name": "tesserabom:args",
+     "value": "-m tickets_mcp"
+    }
+   ]
+  }
+ ]
+}
