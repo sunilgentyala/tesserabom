@@ -1,0 +1,16 @@
+<!-- wazuh-cryptoai-inventory decoders -->
+<!-- Wrapped form produced by the Wazuh command wodle. -->
+<decoder name="cryptoai">
+  <prematch>^ossec: output: 'cryptoai-inventory': </prematch>
+</decoder>
+
+<decoder name="cryptoai-json">
+  <parent>cryptoai</parent>
+  <plugin_decoder offset="after_parent">JSON_Decoder</plugin_decoder>
+</decoder>
+
+<!-- Bare JSON line, for use with a localfile or an integration. -->
+<decoder name="cryptoai">
+  <prematch>^{"cryptoai":</prematch>
+  <plugin_decoder>JSON_Decoder</plugin_decoder>
+</decoder>

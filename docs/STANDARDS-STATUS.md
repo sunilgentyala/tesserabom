@@ -1,0 +1,47 @@
+# Standards and regulatory references: verification status
+
+This add-on emits lookup tags and standard document formats. It does not certify compliance with anything.
+Each reference below records how well it was verified when this project was written (November 2026).
+Re-check anything marked **Unconfirmed** against the primary source before relying on it.
+
+## Output formats
+
+| Reference | Use here | Status |
+|---|---|---|
+| CycloneDX 1.6 JSON schema | CBOM and AI-BOM documents | **Confirmed.** Output is validated against the official `bom-1.6.schema.json` in CI. |
+| CycloneDX `cryptoProperties` (assetType algorithm, certificate, protocol, related-crypto-material) | CBOM structure | **Confirmed** by schema validation. |
+| CycloneDX `machine-learning-model` component and `services` | AI-BOM structure | **Confirmed** by schema validation. Model cards are not yet populated. |
+| DSSE envelope (PAE encoding) | Signed attestations | Implemented from the DSSE specification and covered by round-trip and tamper tests. Not cross-checked against a second implementation. |
+| CycloneDX 1.7 / ECMA-424 | Possible future target | **Unconfirmed.** Field-level changes were not reviewed. |
+| SPDX 3.0 AI profile, CISA "SBOM for AI" minimum elements | Possible future export | **Unconfirmed.** Publication date and field list were not retrieved. |
+
+## Regulatory tags in `wazuh/rules/cryptoai_rules.xml`
+
+| Tag | Source | Status |
+|---|---|---|
+| `dora_art8_4` | Regulation (EU) 2022/2554, Art. 8(4): identify ICT assets | Confirmed from EUR-Lex text. |
+| `dora_rts_2024_1774_art6` | Delegated Regulation (EU) 2024/1774, Art. 6: encryption and cryptographic controls | Confirmed from EUR-Lex text. Paragraph numbering was not fully resolved, so tags stop at article level. |
+| `dora_rts_2024_1774_art7` | Same RTS, Art. 7: cryptographic key management and certificate register | Confirmed from EUR-Lex text, article level. |
+| `nydfs_500.13` | 23 NYCRR 500.13(a): asset inventory | Confirmed from the regulation text. |
+| `nydfs_500.15` | 23 NYCRR 500.15: encryption of nonpublic information | Confirmed from the regulation text. |
+| `pci_dss_12.3.3` | PCI DSS v4.0.1 req. 12.3.3: cipher suite and protocol inventory, reviewed every 12 months | **Unconfirmed.** Taken from secondary sources. Check the wording against the PCI SSC document. |
+| `pqc_readiness`, `crypto_agility`, `ai_bom`, `mcp`, `drift` | Project-defined | Not regulatory. |
+
+## Context that affects planning (not encoded in the tool)
+
+| Item | Status |
+|---|---|
+| A June 2026 US executive order sets post-quantum migration deadlines (key establishment 2030, signatures 2031) and tasks CISA and NIST with CBOM minimum elements within 270 days | **Unconfirmed.** Sources disagree on the order number, and the primary text was not read. |
+| NIST IR 8547 timeline (quantum-vulnerable public-key algorithms deprecated after 2030, disallowed after 2035) | **Unconfirmed** as final. The finalization date came from secondary sources only. |
+| Interagency model risk guidance reported to supersede SR 11-7 (April 2026) | **Unconfirmed.** Law-firm and consultancy sources only. |
+| OpenSSH 9.0 default `sntrup761x25519`, OpenSSH 10.0 default `mlkem768x25519-sha256`; OpenSSL 3.5 adds ML-KEM | Used by the SSH and library checks. Release-note level knowledge, not re-verified here. Note that sntrup is not a NIST standard. |
+| Wazuh 4.14.x has no native CBOM, crypto inventory or AI inventory | Based on documentation and release notes read in November 2026, not on every release's full notes. The 5.0 line was still a release candidate. |
+
+## Detection claims and their limits
+
+- **TLS post-quantum status** is what the endpoint negotiates with this client. If the client library cannot
+  report the negotiated group, the status is recorded as unknown and no finding is raised.
+- **SSH post-quantum status** is inferred from `sshd_config` and the `ssh -V` version. It is not read from a
+  running daemon, so an effective config that differs from the file can be missed.
+- **`hndl_exposure`** is the share of determinable key-exchange surfaces without a post-quantum hybrid. It is a
+  prioritisation heuristic, not a validated risk model.

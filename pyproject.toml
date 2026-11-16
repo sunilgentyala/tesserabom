@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wazuh-cryptoai-inventory"
+version = "0.1.0"
+description = "Endpoint cryptographic (CBOM) and AI/MCP (AI-BOM) inventory with drift detection and signed attestations, built to feed Wazuh."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Sunil Gentyala" }]
+keywords = ["wazuh", "cbom", "cyclonedx", "post-quantum", "ai-bom", "mcp", "siem", "compliance"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Apache Software License",
+  "Topic :: Security :: Cryptography",
+]
+dependencies = ["cryptography>=42"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "jsonschema>=4"]
+
+[project.scripts]
+cryptoai-inventory = "cryptoai_inventory.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

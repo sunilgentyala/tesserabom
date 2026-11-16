@@ -1,0 +1,114 @@
+import socket
+import ssl
+import threading
+
+import pytest
+from cryptography.hazmat.primitives import serialization
+
+from conftest import make_cert, pem
+from cryptoai_inventory import crypto
+
+
+def test_scan_cert_dir_finds_only_certs(cert_dir):
+    assets = crypto.scan_cert_dirs([str(cert_dir)])
+    assert len(assets) == 3
+    assert all(a["quantum_vulnerable"] for a in assets)
+
+
+def test_findings_expired_and_weak_key(cert_dir):
+    assets = {a["subject"]: a for a in crypto.scan_cert_dirs([str(cert_dir)])}
+
+    def kinds(subject):
+        return {f["finding"] for f in crypto.certificate_findings(assets[subject])}
+
+    assert kinds("CN=good.example") == set()
+    assert "cert_expired" in kinds("CN=old.example")
+    assert "cert_weak_key" in kinds("CN=weak.example")
+
+
+def test_self_signed_root_not_judged_on_expiry_or_hash():
+    cert, _ = make_cert("Root", days=-5, issuer_cn="Root", ca=True)
+    asset = crypto.certificate_asset(cert, "t", "t")
+    assert asset["self_signed"]
+    assert crypto.certificate_findings(asset) == []
+
+
+def test_expiring_soon():
+    cert, _ = make_cert("soon.example", issuer_cn="CA", days=10)
+    asset = crypto.certificate_asset(cert, "t", "t")
+    assert [f["finding"] for f in crypto.certificate_findings(asset)] == ["cert_expiring"]
+
+
+def test_symlinked_cert_is_skipped(tmp_path):
+    d = tmp_path / "c"
+    d.mkdir()
+    cert, _ = make_cert("a", issuer_cn="b")
+    (tmp_path / "real.pem").write_bytes(pem(cert))
+    try:
+        (d / "link.pem").symlink_to(tmp_path / "real.pem")
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks unavailable")
+    assert crypto.scan_cert_dirs([str(d)]) == []
+
+
+def test_ssh_pq_status():
+    assert crypto.ssh_pq_status("curve25519-sha256", (10, 0)) is False
+    assert crypto.ssh_pq_status("mlkem768x25519-sha256,curve25519-sha256", (9, 0)) is True
+    assert crypto.ssh_pq_status(None, (10, 0)) is True
+    assert crypto.ssh_pq_status(None, (8, 4)) is False
+    assert crypto.ssh_pq_status(None, None) is None
+    assert crypto.ssh_pq_status("+diffie-hellman-group14-sha1", None) is None
+    assert crypto.ssh_pq_status("-mlkem768x25519-sha256", (10, 0)) is False
+
+
+def test_parse_sshd_config_first_kex_wins():
+    parsed = crypto.parse_sshd_config("# c\nKexAlgorithms a,b\nHostKey /x\nKexAlgorithms c\n")
+    assert parsed == {"kex": "a,b", "host_keys": ["/x"]}
+
+
+def test_hndl_exposure():
+    eps = [{"pq_hybrid_negotiated": False}, {"pq_hybrid_negotiated": True}, {"pq_hybrid_negotiated": None}]
+    assert crypto.hndl_exposure(eps, []) == 0.5
+    assert crypto.hndl_exposure([{"pq_hybrid_negotiated": None}], [{"pq_kex": None}]) is None
+
+
+def test_probe_refuses_non_loopback():
+    with pytest.raises(ValueError):
+        crypto.probe_tls(443, host="192.0.2.10")
+
+
+def test_probe_local_tls_server(tmp_path):
+    cert, key = make_cert("localhost", issuer_cn="localhost")
+    crt, keyf = tmp_path / "s.crt", tmp_path / "s.key"
+    crt.write_bytes(pem(cert))
+    keyf.write_bytes(key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                                       serialization.NoEncryption()))
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(str(crt), str(keyf))
+    srv = socket.socket()
+    srv.bind(("127.0.0.1", 0))
+    srv.listen(1)
+    port = srv.getsockname()[1]
+
+    def serve():
+        try:
+            conn, _ = srv.accept()
+            with ctx.wrap_socket(conn, server_side=True):
+                pass
+        except OSError:
+            pass
+
+    threading.Thread(target=serve, daemon=True).start()
+    result = crypto.probe_tls(port)
+    srv.close()
+    assert result and result["endpoint"]["version"] in ("TLSv1.2", "TLSv1.3")
+    assert result["certificate"]["public_key"]["name"].startswith("ECDSA")
+    assert result["endpoint"]["certificate_id"] == result["certificate"]["id"]
+
+
+def test_ssh_binary_never_resolved_from_path(monkeypatch, tmp_path):
+    fake = tmp_path / ("ssh.exe" if __import__("os").name == "nt" else "ssh")
+    fake.write_text("evil")
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setattr(crypto, "_TRUSTED_SSH", ())
+    assert crypto.openssh_version() is None

@@ -1,0 +1,4 @@
+ossec: output: 'cryptoai-inventory': {"cryptoai":{"event":"finding","host":"web01","tool_version":"0.1.0","finding":"cert_expired","severity":"high","asset":"cert:aa11","detail":"CN=api.example.org expired 2026-01-01T00:00:00+00:00"}}
+ossec: output: 'cryptoai-inventory': {"cryptoai":{"event":"finding","host":"web01","tool_version":"0.1.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
+{"cryptoai":{"event":"finding","host":"dev02","tool_version":"0.1.0","finding":"mcp_unpinned_package","severity":"medium","asset":"mcp:mcp.json:files","detail":"MCP server files runs unpinned package example-mcp"}}
+ossec: output: 'cryptoai-inventory': {"cryptoai":{"event":"summary","host":"web01","tool_version":"0.1.0","findings":2,"certificates":61,"quantum_vulnerable_certs":61,"hndl_exposure":1.0}}

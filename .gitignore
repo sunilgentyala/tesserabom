@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# Never commit scan output, baselines or signing keys: they describe real hosts.
+cryptoai-out/
+*.dsse.json
+baseline.json
+cryptoai-signing.key
+cryptoai-signing.pub
+*.key
