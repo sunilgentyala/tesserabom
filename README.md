@@ -91,8 +91,9 @@ Example output line:
 > (100900 to 100999), and one rule per finding the tool can emit. They have **not** been run against a live Wazuh
 > manager from this repository. Run `wazuh-logtest` before you deploy.
 
-The command-wodle approach keeps the add-on a separate process that talks to Wazuh only through logs, which also keeps
-it clear of Wazuh's copyleft code. That is a design intent, not legal advice.
+The command-wodle approach keeps the add-on a separate process that talks to Wazuh only through logs. It contains no
+Wazuh code or data files. See [docs/LICENSING-NOTES.md](docs/LICENSING-NOTES.md) for how that relates to Wazuh's own
+license terms. That is a design intent, not legal advice.
 
 ### Alerts and compliance tags
 
@@ -104,7 +105,8 @@ Each rule carries group tags you can filter on in the dashboard. They are lookup
 | AI models, MCP servers, runtimes, drift | `dora_art8_4`, `nydfs_500.13`, `ai_bom`, `mcp`, `drift` |
 
 How well each reference was verified is recorded in [docs/STANDARDS-STATUS.md](docs/STANDARDS-STATUS.md). The PCI DSS
-12.3.3 wording in particular still needs checking against the PCI SSC document.
+12.3.3 wording is corroborated by several sources but the PCI SSC document itself could not be fetched, so quote the
+official text, not this README, in audit evidence.
 
 ## Security by design
 
@@ -117,7 +119,8 @@ pip-audit alongside the tests.
 
 - Post-quantum status for TLS depends on what the probing client can negotiate. If it cannot report the group, the
   result is "unknown" and no finding is raised.
-- SSH status is inferred from config and version, not read from the running daemon.
+- SSH status is inferred from config and the OpenSSH version, not read from the running daemon, and the version comes
+  from the `ssh` client binary as a stand-in for `sshd`.
 - `hndl_exposure` in the summary line is a transparent prioritisation heuristic, not a validated risk model.
 - Attestations use Ed25519, a classical signature. They prove integrity today and are not post-quantum.
 - Windows SSH configuration and macOS paths are supported on a best-effort basis and have had less testing than Linux
