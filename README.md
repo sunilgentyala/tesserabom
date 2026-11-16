@@ -1,65 +1,99 @@
 <div align="center">
 
+<img src="docs/assets/tesserabom-mark.svg" alt="tesserabom" width="96" height="96">
+
 # tesserabom
 
-**Know which cryptography and which AI is actually running on your endpoints, and get alerted the moment it drifts.**
+### One tile per endpoint. One mosaic of every cipher and every model you run.
 
+Endpoint **CBOM** and **AI-BOM** with baseline **drift and downgrade alerts**, **signed attestations**,
+and **Wazuh-native rules** that are tested on a real manager.
+
+[![ci](https://github.com/sunilgentyala/tesserabom/actions/workflows/ci.yml/badge.svg)](https://github.com/sunilgentyala/tesserabom/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-Apache--2.0-blue)
-![python](https://img.shields.io/badge/python-3.9%2B-3776AB)
+![python](https://img.shields.io/badge/python-3.9%20to%203.13-3776AB)
 ![cyclonedx](https://img.shields.io/badge/CycloneDX-1.6%20schema--validated-2ea44f)
+![wazuh](https://img.shields.io/badge/Wazuh-4.14.10%20logtest%20verified-005571)
 ![status](https://img.shields.io/badge/status-alpha-orange)
-![wazuh](https://img.shields.io/badge/for-Wazuh%204.x-005571)
+
+[Quick start](#quick-start) &nbsp;|&nbsp; [What it finds](#what-it-finds) &nbsp;|&nbsp; [Wazuh integration](#wazuh-integration) &nbsp;|&nbsp; [Security](#security-by-design) &nbsp;|&nbsp; [Honest limits](#honest-limits)
 
 </div>
 
 ---
 
-## Why this exists
+## Why
 
-Wazuh gives you strong endpoint telemetry, but as of the documentation and release notes reviewed in November 2026 it has no
-native view of **cryptographic assets** (certificates, TLS and SSH posture, post-quantum readiness) or **AI assets**
-(local models, runtimes, MCP servers). Regulators and auditors increasingly ask for exactly those inventories, and
-post-quantum migration cannot be planned without one.
+Auditors and regulators now ask two questions that most endpoint tooling cannot answer: **which cryptography is actually
+running here, and how ready is it for post-quantum migration?** and **which AI models and MCP servers are on these machines?**
+Wazuh gives you excellent endpoint telemetry, and the 4.14.x release notes searched in November 2026 show no native
+cryptographic or AI inventory.
 
-This add-on fills that gap with one small, dependency-light endpoint collector that:
+tesserabom is a small, dependency-light collector that fills that gap and reports through the channel Wazuh already
+understands: JSON log lines, decoders, rules and compliance tags.
 
-- produces a **CycloneDX 1.6 CBOM** and a **CycloneDX 1.6 AI-BOM**, both validated against the official JSON schema,
-- turns every finding into a **Wazuh-ready JSON log line** with decoders and rules included,
-- remembers a **baseline** and alerts on **cryptographic downgrades** and configuration drift, not just first-time findings,
-- signs each BOM as a **DSSE attestation** so an inventory can be proven untampered,
-- keeps secrets out: MCP credentials are never read, only the names of the keys that hold them.
+## At a glance
+
+| | |
+|---|---|
+| **Two BOMs, one run** | CycloneDX 1.6 **CBOM** (certificates, TLS, SSH, libraries) and **AI-BOM** (models, MCP servers, runtimes). Both validated against the official JSON schema in CI. |
+| **Drift that matters** | A baseline remembers every asset. Alerts fire on new, removed and changed assets, and on **cryptographic downgrades** such as TLS 1.3 falling to 1.2 or a lost post-quantum hybrid. |
+| **Provable output** | Each BOM can be wrapped in a **DSSE** envelope signed with Ed25519, so an inventory can be shown untampered. |
+| **Wazuh-native** | 19 finding rules, decoders, an agent snippet and compliance tags. Verified with `wazuh-logtest` on **Wazuh 4.14.10**. `pci_dss_12.3.3` lands in Wazuh's own PCI dashboard field. |
+| **Safe to run as root** | No shell, no `PATH` lookups, loopback-only probing, secrets never read, atomic 0600 writes. |
 
 ## How it works
 
 ```mermaid
 flowchart LR
   subgraph Endpoint
-    A[tesserabom scan] --> B[(cbom.json)]
-    A --> C[(aibom.json)]
-    A --> D[baseline.json]
-    A -->|Ed25519 DSSE| E[(*.dsse.json)]
+    S[tesserabom scan] --> CB[(cbom.json)]
+    S --> AB[(aibom.json)]
+    S <--> BL[(baseline.json)]
+    S -->|Ed25519 DSSE| EN[(*.dsse.json)]
   end
-  A -->|JSON finding lines| W[Wazuh command wodle]
-  W --> M[Wazuh manager<br/>decoders and rules 100900-100999]
-  M --> I[Indexer and dashboard<br/>alerts tagged by framework]
+  S -->|JSON finding lines| W[Wazuh command wodle]
+  W --> M[Wazuh manager<br/>decoder + rules 100900 to 100999]
+  M --> D[Alerts and dashboards<br/>tagged by framework]
 ```
 
-| Collector | What it finds |
-|---|---|
-| **Certificates** | X.509 files in standard directories, the Windows certificate stores (`MY`, `ROOT`), and the certificate each probed TLS endpoint presents. Records key family and size, signature algorithm, validity, and whether the key is quantum-vulnerable. |
-| **TLS endpoints** | Loopback listeners you name. Records negotiated protocol version, cipher, key-exchange group, and whether a post-quantum hybrid was negotiated. |
-| **SSH** | `sshd_config` key-exchange settings plus the OpenSSH version, to infer post-quantum key-exchange status. |
-| **Crypto libraries** | OpenSSL version in use and whether it is new enough for ML-KEM. |
-| **Local models** | GGUF, safetensors, ONNX, PyTorch, pickle, Keras files. Hashes them, checks the header against the extension, flags pickle-based formats. |
-| **MCP servers** | Configs for Claude Desktop, Claude Code, Cursor, Windsurf and VS Code. Flags unpinned `npx`/`uvx` packages, cleartext remote URLs, and credentials kept in config files. |
-| **AI runtimes** | Local Ollama and LM Studio listeners, and an Ollama configured to listen beyond loopback. |
+## What it finds
+
+<table>
+<tr><th width="22%">Collector</th><th>Detail</th></tr>
+<tr><td><b>Certificates</b></td><td>X.509 files in standard directories, the Windows certificate stores (<code>MY</code>, <code>ROOT</code>), and the certificate each probed TLS endpoint presents. Records key family and size, signature algorithm, validity, and whether the key is quantum-vulnerable. Malformed certificates are skipped, never fatal.</td></tr>
+<tr><td><b>TLS endpoints</b></td><td>Loopback listeners you name. Negotiated protocol version, cipher, key-exchange group, and whether a post-quantum hybrid was negotiated.</td></tr>
+<tr><td><b>SSH</b></td><td><code>sshd_config</code> key-exchange settings plus the OpenSSH version, to infer post-quantum key-exchange status.</td></tr>
+<tr><td><b>Crypto libraries</b></td><td>OpenSSL version in use and whether it is new enough for ML-KEM (3.5 or later).</td></tr>
+<tr><td><b>Local models</b></td><td>GGUF, safetensors, ONNX, PyTorch, pickle and Keras files. Hashed, header checked against the extension, pickle-based formats flagged.</td></tr>
+<tr><td><b>MCP servers</b></td><td>Claude Desktop, Claude Code, Cursor, Windsurf and VS Code configs. Flags unpinned <code>npx</code> and <code>uvx</code> packages, cleartext remote URLs, and credentials kept in config files. Only key names are read, never values.</td></tr>
+<tr><td><b>AI runtimes</b></td><td>Local Ollama and LM Studio listeners, and an Ollama configured to listen beyond loopback.</td></tr>
+</table>
+
+<details>
+<summary><b>All 19 findings and their severity</b></summary>
+
+| Finding | Severity | Area |
+|---|---|---|
+| `cert_expired`, `cert_weak_signature`, `cert_weak_key` | high (`cert_weak_key` is medium on self-signed roots) | Certificates |
+| `cert_expiring` | medium | Certificates |
+| `tls_legacy_version` | high | TLS |
+| `tls_no_pq_hybrid`, `ssh_no_pq_kex` | info | Post-quantum readiness |
+| `crypto_downgrade` | high | Drift |
+| `drift_changed` | medium | Drift |
+| `drift_added`, `drift_removed` | info (medium for models, MCP servers, runtimes) | Drift |
+| `model_header_mismatch`, `mcp_cleartext_remote`, `ai_runtime_exposed` | high | AI |
+| `model_unsafe_serialization`, `mcp_unpinned_package`, `mcp_secret_in_config` | medium | AI |
+| `mcp_remote_server`, `ai_runtime_present` | info | AI |
+
+</details>
 
 ## Quick start
 
 ```bash
-pip install .                       # requires Python 3.9+ and the cryptography package
+pip install .                      # Python 3.9+; the only dependency is the cryptography package
 
-tesserabom keygen --dir /etc/tesserabom          # once per fleet or per host
+tesserabom keygen --dir /etc/tesserabom                 # once per fleet or host
 tesserabom scan \
   --out /var/lib/tesserabom/out \
   --baseline /var/lib/tesserabom/baseline.json \
@@ -67,42 +101,36 @@ tesserabom scan \
   --tls-port 443 --tls-port 8443
 
 tesserabom verify /var/lib/tesserabom/out/cbom.dsse.json --pub /etc/tesserabom/tesserabom-signing.pub
+tesserabom diff old/cbom.json new/cbom.json            # what changed between two hosts or two scans
 ```
 
-Useful options: `--cert-dir`, `--model-dir`, `--mcp-config` (each replaces the defaults), `--all-users` (inspect every
-user home, needed when the agent runs as root or SYSTEM), `--hash-limit-mb`, `--no-update-baseline`, `--skip-crypto`, `--skip-ai`.
+Useful options: `--cert-dir`, `--model-dir`, `--mcp-config` (each replaces the defaults), `--all-users` (inspect every user
+home; needed when the agent runs as root or SYSTEM), `--hash-limit-mb`, `--no-update-baseline`, `--skip-crypto`, `--skip-ai`.
 
-Example output line:
+A finding, as Wazuh receives it:
 
 ```json
-{"tesserabom":{"event":"finding","host":"web01","tool_version":"0.2.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
+{"tesserabom":{"event":"finding","host":"web01","tool_version":"0.3.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
 ```
 
 ## Wazuh integration
 
-1. Copy `wazuh/decoders/tesserabom_decoders.xml` and `wazuh/rules/tesserabom_rules.xml` to the manager's
-   `etc/decoders/` and `etc/rules/`, then restart the manager.
-2. Add `wazuh/agent/ossec-agent-snippet.xml` to the agent configuration. It runs the scan every 12 hours through the
-   command wodle. Depending on your Wazuh version, agents may need remote commands enabled for centrally pushed
-   command wodles; check the Wazuh documentation for your release.
-3. Test offline with `wazuh-logtest` (paste the lines from `wazuh/samples/logtest.txt`) or run `scripts/logtest_docker.sh`.
+1. Copy `wazuh/decoders/tesserabom_decoders.xml` and `wazuh/rules/tesserabom_rules.xml` to the manager's `etc/decoders/`
+   and `etc/rules/`, then restart the manager.
+2. Add `wazuh/agent/ossec-agent-snippet.xml` to the agent configuration. It runs a scan every 12 hours through the
+   command wodle. Depending on your Wazuh version, centrally pushed command wodles may need remote commands enabled.
+3. Test offline with `wazuh-logtest` (lines in `wazuh/samples/logtest.txt`) or run `scripts/logtest_docker.sh`.
 
-> **Tested against Wazuh 4.14.10.** `scripts/logtest_docker.sh` starts a real Wazuh manager container, loads the
-> decoders and rules, and runs every line in `wazuh/samples/logtest.txt` through `wazuh-logtest`, asserting the rule
-> that fires. It found and fixed two real problems that unit tests could not: Wazuh's built-in `ossec` decoder claims
-> command-wodle lines first, and bare JSON lines are decoded by the built-in `json` decoder. What is **not** yet
-> covered is a full agent-to-manager run through the command wodle, and Wazuh 5.x (still a release candidate when
-> this was written).
+> **Tested on a real manager.** `scripts/logtest_docker.sh` starts a Wazuh 4.14.10 container, loads the content, and
+> asserts the rule that fires for each sample. It caught two bugs unit tests could not. The command wodle delivers
+> the raw JSON line (verified on a live manager: location `command_tesserabom`, decoded by Wazuh's built-in `json`
+> decoder), so the rules anchor on the decoded `tesserabom.event` field. `<localfile>` command collection instead
+> wraps lines as `ossec: output: 'tag': ...`, which Wazuh's built-in `ossec` decoder claims first, so a small child
+> decoder handles that form. Not yet covered: a remote agent reporting to a separate manager, and Wazuh 5.x.
 
-The command-wodle approach keeps the add-on a separate process that talks to Wazuh only through logs. It contains no
-Wazuh code or data files. See [docs/LICENSING-NOTES.md](docs/LICENSING-NOTES.md) for how that relates to Wazuh's own
-license terms. That is a design intent, not legal advice.
+### Compliance tags
 
-### Alerts and compliance tags
-
-Each rule carries group tags you can filter on in the dashboard. They are lookup aids, not statements of compliance.
-Wazuh promotes the `pci_dss_` tag into its native `rule.pci_dss` field (verified with `wazuh-logtest`), so these alerts
-also appear in Wazuh's built-in PCI DSS dashboard.
+Tags are lookup aids for dashboards, **not statements of compliance**.
 
 | Findings | Tags |
 |---|---|
@@ -110,43 +138,70 @@ also appear in Wazuh's built-in PCI DSS dashboard.
 | AI models, MCP servers, runtimes, drift | `dora_art8_4`, `nydfs_500.13`, `ai_bom`, `mcp`, `drift` |
 
 How well each reference was verified is recorded in [docs/STANDARDS-STATUS.md](docs/STANDARDS-STATUS.md). The PCI DSS
-12.3.3 wording is corroborated by several sources but the PCI SSC document itself could not be fetched, so quote the
-official text, not this README, in audit evidence.
+12.3.3 wording is corroborated by several sources but the PCI SSC document could not be fetched, so quote the official
+text in audit evidence. Licensing context is in [docs/LICENSING-NOTES.md](docs/LICENSING-NOTES.md).
+
+## How it differs
+
+The neighbours below were found in a November 2026 search. The search was broad but not exhaustive, so read this as
+"to our knowledge, no open-source project found combines all five of: endpoint collection, CBOM plus AI-BOM, a
+baseline with downgrade detection, signed attestations, and Wazuh-native rules", not as a claim to be first.
+
+| Project | Overlaps | What it does not do |
+|---|---|---|
+| [CBOMkit](https://github.com/cbomkit/cbomkit) and Sonar Cryptography | CycloneDX CBOM | Scans source code and container images, not live endpoints. No AI-BOM, drift, signing or Wazuh content. |
+| [cdxgen](https://github.com/cdxgen/cdxgen) | CycloneDX BOMs, MCP and model discovery in build-time scans | A build-time generator, not a continuous endpoint monitor. No Wazuh content. |
+| [AC-Scanner](https://github.com/qubitac/AC-Scanner) | CBOM with run-to-run comparison | Remote network scanner under AGPL-3.0. No AI-BOM, signing or Wazuh. |
+| [Trusera ai-bom](https://github.com/Trusera/ai-bom), [agent-bom](https://github.com/msaad00/agent-bom) | AI-BOM from model files and MCP configs | No CBOM, no Wazuh content, no signed BOMs. |
+| [wazuh-shadow-ai-detection](https://github.com/DShamzaj/wazuh-shadow-ai-detection) | Wazuh rules for unapproved AI use | Detection only: no BOM output, no CBOM, no signing. |
+| [sbom-tools](https://github.com/sbom-tool/sbom-tools) | Diffs and grades SBOM, CBOM and AI-BOM | Consumes BOMs rather than collecting them. |
+| OPSWAT MetaDefender CBOM and AIBOM (commercial) | CBOM plus AI model metadata | File scanning rather than an endpoint collector, per its launch article. |
+
+An independent code comparison against cbomkit, sonar-cryptography, Snyk agent-scan, cdxgen, osquery, sslyze and
+ssh-audit found no copied or near-duplicate code. The overlaps are standards-driven: CycloneDX field names, the DSSE
+encoding, OpenSSH algorithm names and MCP client config paths. It did not read upstream trees line by line and did
+not use a commercial clone detector.
 
 ## Security by design
 
 The collector often runs as root, so it is built to be a poor attack target: no shell, no `PATH` lookups, loopback-only
 probing, size and depth caps, no symlink following, secret values never read, atomic 0600 writes, and refusal to use
-group-readable signing keys. Details and the threat model are in [SECURITY.md](SECURITY.md). CI runs bandit and
-pip-audit alongside the tests.
+group-readable signing keys. The threat model is in [SECURITY.md](SECURITY.md). CI runs bandit and pip-audit alongside
+the tests on Linux and Windows.
 
-## Known limits
+## Honest limits
 
 - Post-quantum status for TLS depends on what the probing client can negotiate. If it cannot report the group, the
   result is "unknown" and no finding is raised.
-- SSH status is inferred from config and the OpenSSH version, not read from the running daemon, and the version comes
-  from the `ssh` client binary as a stand-in for `sshd`.
+- SSH status uses the effective `sshd -T` configuration only when run as root; otherwise it falls back to reading
+  `sshd_config`, which can miss `Include` files and defaults. The version comes from the `ssh` client binary as a
+  stand-in for `sshd`.
+- MCP checks read configuration only. tesserabom never launches MCP servers, so it cannot see a server changing the
+  tool descriptions it advertises after approval. It pins the configured launch spec instead.
 - `hndl_exposure` in the summary line is a transparent prioritisation heuristic, not a validated risk model.
 - Attestations use Ed25519, a classical signature. They prove integrity today and are not post-quantum.
-- Windows SSH configuration and macOS paths are supported on a best-effort basis and have had less testing than Linux
-  and Windows certificate stores.
+- Windows SSH and macOS paths get less testing than Linux and the Windows certificate stores.
+- Wazuh 5.x (still a release candidate when this was written) and a full agent-to-manager run are untested.
 
 ## Roadmap
 
-- Native ML-KEM and ML-DSA certificate detection as library support lands
-- SPDX 3.0 AI profile export
-- Post-quantum attestation signatures
-- Dashboard pack for the Wazuh indexer
-- Passive TLS observation to complement loopback probing
+- [x] CBOM and AI-BOM diff (`tesserabom diff`)
+- [x] Effective SSH configuration via `sshd -T`
+- [ ] Passive TLS observation from Zeek or Suricata logs (needs a spike to confirm the negotiated group is logged)
+- [ ] Agent skill and tool-description inventory with integrity pinning
+- [ ] SPDX 3.0 AI profile and CycloneDX 1.7 export
+- [ ] Post-quantum attestation signatures
+- [ ] Wazuh 5.x content pack
+- [ ] Dashboard pack for the Wazuh indexer
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
 python -m pytest -q
-# Validate BOM output against the official schema:
-#   point CYCLONEDX_SCHEMA_DIR at a directory holding bom-1.6.schema.json, spdx.schema.json, jsf-0.82.schema.json
-#   from github.com/CycloneDX/specification (tag 1.6, schema/)
+bash scripts/logtest_docker.sh        # needs Docker; verifies the rules on a real Wazuh manager
+# Schema validation needs CYCLONEDX_SCHEMA_DIR pointing at bom-1.6.schema.json, spdx.schema.json and
+# jsf-0.82.schema.json from github.com/CycloneDX/specification (tag 1.6, schema/)
 ```
 
 ## License

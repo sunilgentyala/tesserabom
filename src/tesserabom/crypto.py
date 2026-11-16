@@ -286,12 +286,15 @@ _TRUSTED_SSH = ("/usr/bin/ssh", "/usr/local/bin/ssh", "/bin/ssh", "/opt/homebrew
                 r"C:\Windows\System32\OpenSSH\ssh.exe")
 
 
-def _trusted_ssh() -> Optional[str]:
-    """Return a known absolute ssh path; never resolve through PATH (the agent often runs as root).
+_TRUSTED_SSHD = ("/usr/sbin/sshd", "/usr/local/sbin/sshd", "/sbin/sshd", "/opt/homebrew/sbin/sshd")
+
+
+def _trusted_binary(candidates: Iterable[str]) -> Optional[str]:
+    """Return a known absolute path; never resolve through PATH (the agent often runs as root).
 
     On POSIX the binary must be owned by root and not writable by group or others.
     """
-    for candidate in _TRUSTED_SSH:
+    for candidate in candidates:
         if not os.path.isfile(candidate):
             continue
         if os.name != "nt":
@@ -300,6 +303,36 @@ def _trusted_ssh() -> Optional[str]:
                 continue
         return candidate
     return None
+
+
+def _trusted_ssh() -> Optional[str]:
+    return _trusted_binary(_TRUSTED_SSH)
+
+
+def _is_root() -> bool:
+    return os.name != "nt" and hasattr(os, "geteuid") and os.geteuid() == 0
+
+
+def effective_sshd_config() -> Optional[Dict[str, Any]]:
+    """Ask the installed sshd for its effective configuration with `sshd -T`.
+
+    This reflects Include files, Match defaults and compiled-in defaults, which a plain read of
+    sshd_config cannot. It needs root (host keys must be readable), so it returns None otherwise.
+    """
+    if not _is_root():
+        return None
+    exe = _trusted_binary(_TRUSTED_SSHD)
+    if not exe:
+        return None
+    try:
+        proc = subprocess.run([exe, "-T"], capture_output=True, text=True,  # nosec B603
+                              timeout=10, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0 or not proc.stdout:
+        return None
+    parsed = parse_sshd_config(proc.stdout)
+    return parsed if parsed["kex"] else None
 
 
 def openssh_version() -> Optional[Tuple[int, int]]:
@@ -356,15 +389,20 @@ def scan_ssh(config_paths: Iterable[str]) -> Dict[str, Any]:
     kex: Optional[str] = None
     host_keys: List[str] = []
     config_found = None
-    for path in config_paths:
-        raw = read_bounded(path, 500_000)
-        if raw is None:
-            continue
-        parsed = parse_sshd_config(raw.decode("utf-8", "replace"))
-        config_found = path
-        kex = parsed["kex"]
-        host_keys = parsed["host_keys"]
-        break
+    source = None
+    effective = effective_sshd_config()
+    if effective:
+        kex, host_keys, config_found, source = effective["kex"], effective["host_keys"], "sshd -T", "sshd -T"
+    else:
+        for path in config_paths:
+            raw = read_bounded(path, 500_000)
+            if raw is None:
+                continue
+            parsed = parse_sshd_config(raw.decode("utf-8", "replace"))
+            config_found, source = path, "sshd_config file"
+            kex = parsed["kex"]
+            host_keys = parsed["host_keys"]
+            break
     if config_found is None and version is None:
         return {"assets": [], "findings": []}
     pq = ssh_pq_status(kex, version)
@@ -375,6 +413,7 @@ def scan_ssh(config_paths: Iterable[str]) -> Dict[str, Any]:
         "kex_config": kex,
         "pq_kex": pq,
         "config": config_found,
+        "config_source": source or "version only",
         "host_key_files": host_keys,
     }
     findings = []

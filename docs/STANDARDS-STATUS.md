@@ -47,7 +47,8 @@ Re-check anything marked **Unconfirmed** against the primary source before relyi
 |---|---|
 | Decoders and rules produce the expected alerts | **Confirmed** on Wazuh 4.14.10 with `wazuh-logtest` (`scripts/logtest_docker.sh`). |
 | `pci_dss_*` group tags are promoted to the native `rule.pci_dss` field | **Confirmed** in the same run. |
-| Command wodle output reaches the rules end to end from a real agent | **Not tested.** Only the log-line format is verified. |
+| Command wodle delivers the raw JSON line, decoded by the built-in `json` decoder (location `command_tesserabom`) | **Confirmed** on a live 4.14.10 manager running the wodle locally. The `ossec: output: 'tag':` prefix applies to `<localfile>` command collection only. |
+| A remote agent reporting to a separate manager | **Not tested.** |
 | Wazuh 5.x (Engine replaces analysisd) | **Not tested.** Rule and decoder syntax may need changes. |
 
 ## Detection claims and their limits

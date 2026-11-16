@@ -1,14 +1,15 @@
 <!-- tesserabom rules. IDs 100900-100999 are reserved for this add-on. -->
 <!-- Compliance groups are lookup tags for dashboards and reports. They are not a statement of compliance. -->
 <group name="tesserabom,">
-  <!-- Wrapped form: the command wodle prefixes output with "ossec: output: 'tag': ". The child decoder in
+  <!-- Wrapped form: <localfile> command collection prefixes output with "ossec: output: 'tag': ". The child decoder in
        tesserabom_decoders.xml parses the JSON, so this rule anchors on the decoded field. -->
   <rule id="100900" level="0">
     <decoded_as>ossec</decoded_as>
     <field name="tesserabom.event">\.+</field>
     <description>tesserabom output (command wodle).</description>
   </rule>
-  <!-- Bare form: one JSON object per line, decoded by the built-in json decoder (localfile or integration). -->
+  <!-- Bare form: one JSON object per line, decoded by the built-in json decoder. This is what the command wodle
+       delivers (location command_tesserabom), and also what a plain JSON localfile or an integration produces. -->
   <rule id="100901" level="0">
     <decoded_as>json</decoded_as>
     <field name="tesserabom.event">\.+</field>

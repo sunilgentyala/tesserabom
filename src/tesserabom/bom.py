@@ -110,7 +110,8 @@ def build_cbom(host: str, crypto: Dict[str, Any], now: Optional[dt.datetime] = N
 
     for ssh in crypto["ssh"]:
         ref = "crypto/" + ssh["id"]
-        props = [_prop("openssh-version", ssh.get("version") or "unknown")]
+        props = [_prop("openssh-version", ssh.get("version") or "unknown"),
+                 _prop("config-source", ssh.get("config_source") or "unknown")]
         if ssh.get("kex_config"):
             props.append(_prop("kex-config", ssh["kex_config"]))
         if ssh.get("pq_kex") is not None:
@@ -157,7 +158,8 @@ def build_aibom(host: str, ai: Dict[str, Any], now: Optional[dt.datetime] = None
     for srv in ai["mcp_servers"]:
         svc: Dict[str, Any] = {
             "bom-ref": srv["id"], "name": srv["name"],
-            "properties": [_prop("protocol", "mcp"), _prop("config", srv["config"])]}
+            "properties": [_prop("protocol", "mcp"), _prop("config", srv["config"]),
+                           _prop("spec-sha256", srv["spec_sha256"])]}
         if srv["url"]:
             svc["endpoints"] = [srv["url"]]
         if srv["command"]:

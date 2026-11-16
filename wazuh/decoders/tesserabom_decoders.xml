@@ -1,8 +1,8 @@
 <!-- tesserabom decoders -->
 <!--
-  Bare JSON lines are handled by Wazuh's built-in json decoder, so only the wrapped
-  command-wodle form needs a decoder. Wazuh's built-in "ossec" decoder claims those
-  lines first, so this is a child of it that parses the JSON payload.
+  The command wodle delivers raw JSON lines, which Wazuh's built-in json decoder already parses, so no decoder is
+  needed for it. Only <localfile> command collection wraps lines as "ossec: output: 'tag': ...". Wazuh's built-in
+  "ossec" decoder claims those first, so this is a child of it that parses the JSON payload.
 -->
 <decoder name="tesserabom-json">
   <parent>ossec</parent>

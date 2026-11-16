@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+- New `tesserabom diff OLD NEW` compares two BOMs (two hosts, or one host over time). Exit code 1 when they differ,
+  `--json` for machines.
+- SSH key-exchange status now uses the effective configuration from `sshd -T` when running as root, instead of
+  reading `sshd_config` alone. Falls back to the file when not root or when `sshd -T` fails. Recorded as
+  `tesserabom:config-source` in the CBOM.
+- MCP servers carry a `spec-sha256` fingerprint of the configured launch command, arguments, endpoint and credential
+  key names, in the AI-BOM and in the drift baseline. tesserabom never launches MCP servers, so this pins what is
+  configured, not what a server later advertises.
+
 ## 0.2.0
 
 Renamed the project to **tesserabom**. This is a breaking change.
@@ -9,6 +20,8 @@ Renamed the project to **tesserabom**. This is a breaking change.
 - Command wodle tag: `tesserabom`; rule and decoder files: `tesserabom_rules.xml`, `tesserabom_decoders.xml`
 - Signing key passphrase variable: `TESSERABOM_KEY_PASSPHRASE`
 - Rule IDs 100900 to 100999 are unchanged
+- Docs: the command wodle delivers raw JSON (verified on a live manager); the `ossec: output:` wrapper applies to
+  `<localfile>` command collection only. Rules and decoders handle both forms
 
 ## 0.1.1
 

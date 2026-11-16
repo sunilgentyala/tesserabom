@@ -32,7 +32,7 @@ def snapshot(crypto: Optional[Dict[str, Any]], ai: Optional[Dict[str, Any]]) -> 
         for m in ai["models"]:
             state[m["id"]] = {"sha256": m["sha256"], "size": m["size_bytes"], "path": m["path"]}
         for s in ai["mcp_servers"]:
-            state[s["id"]] = {"spec": _h([s["command"], s["args"], s["url"], s["env_keys"]])}
+            state[s["id"]] = {"spec": s["spec_sha256"][:16]}
         for r in ai["runtimes"]:
             state[r["id"]] = {"port": r["port"]}
     return state

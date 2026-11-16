@@ -150,3 +150,35 @@ def test_unparseable_certificate_is_skipped_not_fatal(tmp_path, monkeypatch):
     monkeypatch.setattr(crypto, "certificate_asset", flaky)
     assets = crypto.scan_cert_dirs([str(d)])
     assert [a["subject"] for a in assets] == ["CN=good"]
+
+
+class _Proc:
+    def __init__(self, stdout, returncode=0):
+        self.stdout, self.returncode, self.stderr = stdout, returncode, ""
+
+
+def test_effective_sshd_config_used_when_root(monkeypatch):
+    out = "port 22\nkexalgorithms mlkem768x25519-sha256,curve25519-sha256\nhostkey /etc/ssh/ssh_host_ed25519_key\n"
+    monkeypatch.setattr(crypto, "_is_root", lambda: True)
+    monkeypatch.setattr(crypto, "_trusted_binary", lambda c: "/fake/sshd")
+    monkeypatch.setattr(crypto.subprocess, "run", lambda *a, **k: _Proc(out))
+    monkeypatch.setattr(crypto, "openssh_version", lambda: (10, 0))
+    (ep,) = crypto.scan_ssh(["/nonexistent"])["assets"]
+    assert ep["config_source"] == "sshd -T" and ep["pq_kex"] is True
+    assert ep["host_key_files"] == ["/etc/ssh/ssh_host_ed25519_key"]
+
+
+def test_effective_sshd_config_skipped_when_not_root(monkeypatch):
+    monkeypatch.setattr(crypto, "_is_root", lambda: False)
+    assert crypto.effective_sshd_config() is None
+
+
+def test_effective_sshd_failure_falls_back_to_file(monkeypatch, tmp_path):
+    cfg = tmp_path / "sshd_config"
+    cfg.write_text("KexAlgorithms curve25519-sha256\n")
+    monkeypatch.setattr(crypto, "_is_root", lambda: True)
+    monkeypatch.setattr(crypto, "_trusted_binary", lambda c: "/fake/sshd")
+    monkeypatch.setattr(crypto.subprocess, "run", lambda *a, **k: _Proc("", returncode=255))
+    monkeypatch.setattr(crypto, "openssh_version", lambda: (10, 0))
+    (ep,) = crypto.scan_ssh([str(cfg)])["assets"]
+    assert ep["config_source"] == "sshd_config file" and ep["pq_kex"] is False

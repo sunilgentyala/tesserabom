@@ -11,7 +11,7 @@ import socket
 import sys
 from typing import Any, Dict, List, Optional
 
-from . import __version__, ai, attest, bom, crypto, drift
+from . import __version__, ai, attest, bom, crypto, diffbom, drift
 from .util import atomic_write_private
 
 SCHEMA = "tesserabom/1"
@@ -48,6 +48,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     k = sub.add_parser("keygen", help="create an Ed25519 signing key pair")
     k.add_argument("--dir", required=True)
+
+    d = sub.add_parser("diff", help="compare two tesserabom BOMs (two hosts, or one host over time)")
+    d.add_argument("old")
+    d.add_argument("new")
+    d.add_argument("--json", action="store_true", help="machine-readable output")
 
     v = sub.add_parser("verify", help="verify a DSSE envelope")
     v.add_argument("envelope")
@@ -126,6 +131,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             info = attest.keygen(args.dir)
             print(json.dumps(info, indent=2))
             return 0
+        if args.cmd == "diff":
+            result = diffbom.diff_documents(diffbom.load(args.old), diffbom.load(args.new))
+            print(json.dumps(result, indent=2) if args.json else diffbom.render(result))
+            return 1 if (result["added"] or result["removed"] or result["changed"]) else 0
         if args.cmd == "verify":
             with open(args.envelope, "r", encoding="utf-8") as fh:
                 envelope = json.load(fh)

@@ -4,6 +4,8 @@ Privacy rule: environment variable VALUES and header values from MCP configs
 are never read into output. Only key names are recorded.
 """
 
+import hashlib
+import json
 import os
 import re
 import socket
@@ -157,6 +159,17 @@ def _servers_from(doc: Any) -> Dict[str, Any]:
     return {}
 
 
+def spec_hash(command: Optional[str], args: List[str], url: Optional[str], env_keys: List[str]) -> str:
+    """Stable fingerprint of how an MCP server is configured to launch or connect.
+
+    tesserabom never starts MCP servers, so this pins the configured spec, not what the server
+    later advertises. A change here means the launch command, arguments, endpoint or credential
+    keys were edited.
+    """
+    return hashlib.sha256(json.dumps([command, args, url, env_keys], sort_keys=True,
+                                     default=str).encode()).hexdigest()
+
+
 def parse_mcp_config(path: str) -> List[Dict[str, Any]]:
     doc = load_json_file(path)
     out: List[Dict[str, Any]] = []
@@ -184,6 +197,7 @@ def parse_mcp_config(path: str) -> List[Dict[str, Any]]:
             "url": _strip_url_credentials(url),
             "env_keys": env_keys,
             "header_keys": header_keys,
+            "spec_sha256": spec_hash(command, args, _strip_url_credentials(url), env_keys),
         })
     return out
 

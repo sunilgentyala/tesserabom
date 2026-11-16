@@ -91,3 +91,14 @@ def test_user_homes_deduplicates(monkeypatch):
     homes = ai.user_homes(True)
     keys = [ai.os.path.normcase(ai.os.path.realpath(h)) for h in homes]
     assert len(keys) == len(set(keys))
+
+
+def test_spec_hash_stable_and_sensitive(tmp_path):
+    def server(args):
+        p = tmp_path / "m.json"
+        p.write_text(json.dumps({"mcpServers": {"s": {"command": "npx", "args": args, "env": {"K": "secret-value"}}}}))
+        return ai.parse_mcp_config(str(p))[0]
+
+    a, b, c = server(["-y", "pkg@1.0.0"]), server(["-y", "pkg@1.0.0"]), server(["-y", "pkg@1.0.1"])
+    assert a["spec_sha256"] == b["spec_sha256"] != c["spec_sha256"]
+    assert "secret-value" not in json.dumps(a)
