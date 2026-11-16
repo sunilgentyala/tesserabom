@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tesserabom</title>
+<meta name="description" content="Endpoint CycloneDX CBOM and AI-BOM for Wazuh, with baseline drift and downgrade alerts, signed attestations, and rules verified on a real Wazuh manager.">
+<link rel="icon" href="assets/tesserabom-mark.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --ink: #0f172a; --muted: #475569; --line: #e2e8f0;
+    --brand: #0369a1; --brand-ink: #ffffff; --code-bg: #0f172a; --code-ink: #e2e8f0;
+    --a: #38bdf8; --b: #818cf8; --c: #34d399; --d: #f59e0b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1120; --surface: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #22304a;
+      --brand: #38bdf8; --brand-ink: #0b1120; --code-bg: #060b16; --code-ink: #e2e8f0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1120; --surface: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #22304a;
+    --brand: #38bdf8; --brand-ink: #0b1120; --code-bg: #060b16; --code-ink: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  nav { border-bottom: 1px solid var(--line); background: var(--surface); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+  .brand img { width: 28px; height: 28px; }
+  nav .links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 15px; }
+  nav a, .links a { color: var(--muted); text-decoration: none; }
+  nav a:hover { color: var(--brand); }
+  header.hero { padding: 64px 0 40px; text-align: center; }
+  header.hero img { width: 88px; height: 88px; }
+  h1 { font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.1; margin: 16px 0 8px; letter-spacing: -0.02em; }
+  .lede { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--muted); max-width: 40ch; margin: 0 auto 12px; }
+  .sub { color: var(--muted); max-width: 62ch; margin: 0 auto 28px; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 10px 18px; border-radius: 10px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
+  .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 24px; font-size: 13px; }
+  .badge { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
+  section { padding: 40px 0; }
+  h2 { font-size: 1.6rem; margin: 0 0 8px; letter-spacing: -0.01em; }
+  h2 + p { color: var(--muted); margin-top: 0; max-width: 70ch; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 16px; border-radius: 12px; overflow-x: auto; font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+  .flow { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 20px; align-items: stretch; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 14px; text-align: center; }
+  .step b { display: block; margin-bottom: 4px; }
+  .tablewrap { overflow-x: auto; margin-top: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-width: 560px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
+  tr:last-child td { border-bottom: 0; }
+  .note { border-left: 4px solid var(--d); background: var(--surface); padding: 12px 16px; border-radius: 0 10px 10px 0; color: var(--muted); margin-top: 16px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: 14px; text-align: center; }
+  footer a { color: var(--brand); }
+  a { color: var(--brand); }
+  :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/tesserabom-mark.svg" alt="">tesserabom</a>
+    <div class="links">
+      <a href="#features">Features</a><a href="#how">How it works</a><a href="#start">Quick start</a>
+      <a href="#compare">How it differs</a><a href="#limits">Limits</a>
+      <a href="https://github.com/sunilgentyala/tesserabom">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <img src="assets/tesserabom-mark.svg" alt="tesserabom mark: four colored tiles">
+    <h1>One tile per endpoint.</h1>
+    <p class="lede">One mosaic of every cipher and every model you run.</p>
+    <p class="sub">Endpoint <strong>CBOM</strong> and <strong>AI-BOM</strong> with baseline <strong>drift and downgrade alerts</strong>,
+      <strong>signed attestations</strong>, and <strong>Wazuh-native rules</strong> verified on a real manager.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/sunilgentyala/tesserabom#quick-start">Get started</a>
+      <a class="btn" href="https://github.com/sunilgentyala/tesserabom/releases">Releases</a>
+    </div>
+    <div class="badges">
+      <span class="badge">Apache-2.0</span><span class="badge">Python 3.9 to 3.13</span>
+      <span class="badge">CycloneDX 1.6 schema-validated</span><span class="badge">Wazuh 4.14.10 logtest verified</span>
+      <span class="badge">alpha</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<section id="features">
+  <h2>Two inventories auditors keep asking for</h2>
+  <p>Which cryptography is really running here, and how ready is it for post-quantum migration? Which AI models and MCP servers
+    are on these machines? Wazuh gives you excellent telemetry, and the 4.14.x release notes searched in November 2026 show no
+    native answer to either.</p>
+  <div class="grid">
+    <div class="card"><h3><span class="dot" style="background:var(--a)"></span>CBOM</h3>
+      <p>Certificates, TLS endpoint posture, SSH key exchange and crypto libraries, flagged for quantum vulnerability. CycloneDX 1.6.</p></div>
+    <div class="card"><h3><span class="dot" style="background:var(--b)"></span>AI-BOM</h3>
+      <p>Local model files (hashed, header-checked), MCP server configs, and local AI runtimes. Credentials are never read, only key names.</p></div>
+    <div class="card"><h3><span class="dot" style="background:var(--c)"></span>Drift and downgrade</h3>
+      <p>A baseline remembers every asset. Alerts fire on changes, and on downgrades such as TLS 1.3 falling to 1.2.</p></div>
+    <div class="card"><h3><span class="dot" style="background:var(--d)"></span>Signed attestations</h3>
+      <p>Each BOM can be wrapped in a DSSE envelope signed with Ed25519, so an inventory can be proven untampered.</p></div>
+  </div>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <p>A collector runs on each endpoint, writes the BOMs, and prints one JSON line per finding. Wazuh reads those lines through
+    the command wodle and applies 19 rules tagged for PCI DSS, DORA and NYDFS lookups.</p>
+  <div class="flow" role="list">
+    <div class="step" role="listitem"><b>1. Scan</b>certificates, TLS, SSH, models, MCP</div>
+    <div class="step" role="listitem"><b>2. Compare</b>baseline drift and downgrades</div>
+    <div class="step" role="listitem"><b>3. Attest</b>CycloneDX plus DSSE signature</div>
+    <div class="step" role="listitem"><b>4. Alert</b>Wazuh decoder, rules, dashboards</div>
+  </div>
+</section>
+
+<section id="start">
+  <h2>Quick start</h2>
+  <pre><code>pip install .
+
+tesserabom keygen --dir /etc/tesserabom
+tesserabom scan --out /var/lib/tesserabom/out \
+  --baseline /var/lib/tesserabom/baseline.json \
+  --sign-key /etc/tesserabom/tesserabom-signing.key \
+  --tls-port 443
+
+tesserabom verify out/cbom.dsse.json --pub /etc/tesserabom/tesserabom-signing.pub
+tesserabom diff old/cbom.json new/cbom.json</code></pre>
+  <p>Wazuh content (decoder, rules, agent snippet) is in the <code>wazuh/</code> folder and in each release as a zip.
+    <code>scripts/logtest_docker.sh</code> repeats the manager test.</p>
+</section>
+
+<section id="compare">
+  <h2>How it differs</h2>
+  <p>Found in a November 2026 search that was broad but not exhaustive: to our knowledge, no open-source project combines endpoint
+    collection, CBOM plus AI-BOM, a downgrade baseline, signed attestations and Wazuh-native rules. This is not a claim to be first.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Project</th><th>Overlaps</th><th>Does not do</th></tr></thead>
+      <tbody>
+        <tr><td>CBOMkit, Sonar Cryptography</td><td>CycloneDX CBOM</td><td>Source and image scanning only. No AI-BOM, drift, signing or Wazuh.</td></tr>
+        <tr><td>cdxgen</td><td>BOMs, MCP and model discovery at build time</td><td>Not a continuous endpoint monitor. No Wazuh content.</td></tr>
+        <tr><td>AC-Scanner</td><td>CBOM with run comparison</td><td>Remote scanner, AGPL-3.0. No AI-BOM, signing or Wazuh.</td></tr>
+        <tr><td>Trusera ai-bom, agent-bom</td><td>AI-BOM from models and MCP configs</td><td>No CBOM, Wazuh content or signed BOMs.</td></tr>
+        <tr><td>wazuh-shadow-ai-detection</td><td>Wazuh rules for unapproved AI</td><td>Detection only. No BOM output or signing.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="limits">
+  <h2>Honest limits</h2>
+  <div class="note">
+    Post-quantum TLS status depends on what the probing client can negotiate. SSH status uses <code>sshd -T</code> only as root.
+    tesserabom never launches MCP servers, so it pins the configured launch spec but cannot see a server change what it advertises.
+    Attestations use Ed25519, a classical signature. Wazuh 5.x and a remote agent reporting to a separate manager are untested.
+    Compliance tags are lookup aids, not statements of compliance.
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>tesserabom is open source under Apache-2.0.
+      <a href="https://github.com/sunilgentyala/tesserabom">Source</a> &middot;
+      <a href="https://github.com/sunilgentyala/tesserabom/blob/main/SECURITY.md">Security policy</a> &middot;
+      <a href="https://github.com/sunilgentyala/tesserabom/blob/main/CHANGELOG.md">Changelog</a></p>
+  </div>
+</footer>
+</body>
+</html>
