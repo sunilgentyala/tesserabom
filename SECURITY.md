@@ -7,7 +7,7 @@ Security tab. Do not open a public issue for security problems. Expect an acknow
 
 ## Threat model
 
-The collector is intended to run as a privileged Wazuh agent child process (often root or SYSTEM), so it is
+The collector is intended to run as a privileged SIEM agent child process (often root or SYSTEM), so it is
 written to be a poor attack target and a poor data leak.
 
 | Concern | Control |
@@ -25,6 +25,6 @@ written to be a poor attack target and a poor data leak.
 - Ed25519 attestations are classical signatures. They protect integrity today, not against a future quantum
   adversary. A post-quantum signature suite is on the roadmap.
 - Output files describe real hosts (paths, hostnames, certificate subjects). Treat them as sensitive.
-- The Wazuh decoders and rules were verified with `wazuh-logtest` on a Wazuh 4.14.10 manager
-  (`scripts/logtest_docker.sh`), but not in an end-to-end agent run, not on Wazuh 5.x, and not in CI.
+- The SIEM decoders and rules were verified with `logtest` on a a 4.14.10 manager manager
+  (`scripts/logtest_docker.sh`), but not in an end-to-end agent run, not on the 5.x series, and not in CI.
 - `--all-users` reads other users' home directories and therefore needs the privileges to do so. That is its purpose.

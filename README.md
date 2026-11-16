@@ -7,16 +7,16 @@
 ### One tile per endpoint. One mosaic of every cipher and every model you run.
 
 Endpoint **CBOM** and **AI-BOM** with baseline **drift and downgrade alerts**, **signed attestations**,
-and **Wazuh-native rules** that are tested on a real manager.
+and **SIEM-native rules** that are tested on a real manager.
 
 [![ci](https://github.com/sunilgentyala/tesserabom/actions/workflows/ci.yml/badge.svg)](https://github.com/sunilgentyala/tesserabom/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-Apache--2.0-blue)
 ![python](https://img.shields.io/badge/python-3.9%20to%203.13-3776AB)
 ![cyclonedx](https://img.shields.io/badge/CycloneDX-1.6%20schema--validated-2ea44f)
-![wazuh](https://img.shields.io/badge/Wazuh-4.14.10%20logtest%20verified-005571)
+![siem](https://img.shields.io/badge/SIEM-manager%20logtest%20verified-005571)
 ![status](https://img.shields.io/badge/status-alpha-orange)
 
-[Quick start](#quick-start) &nbsp;|&nbsp; [What it finds](#what-it-finds) &nbsp;|&nbsp; [Wazuh integration](#wazuh-integration) &nbsp;|&nbsp; [Security](#security-by-design) &nbsp;|&nbsp; [Honest limits](#honest-limits)
+[Quick start](#quick-start) &nbsp;|&nbsp; [What it finds](#what-it-finds) &nbsp;|&nbsp; [SIEM integration](#siem-integration) &nbsp;|&nbsp; [Security](#security-by-design) &nbsp;|&nbsp; [Honest limits](#honest-limits)
 
 </div>
 
@@ -26,10 +26,10 @@ and **Wazuh-native rules** that are tested on a real manager.
 
 Auditors and regulators now ask two questions that most endpoint tooling cannot answer: **which cryptography is actually
 running here, and how ready is it for post-quantum migration?** and **which AI models and MCP servers are on these machines?**
-Wazuh gives you excellent endpoint telemetry, and the 4.14.x release notes searched in November 2026 show no native
+The SIEM gives you excellent endpoint telemetry, and the 4.14.x release notes searched in November 2026 show no native
 cryptographic or AI inventory.
 
-tesserabom is a small, dependency-light collector that fills that gap and reports through the channel Wazuh already
+tesserabom is a small, dependency-light collector that fills that gap and reports through the channel the SIEM already
 understands: JSON log lines, decoders, rules and compliance tags.
 
 ## At a glance
@@ -39,7 +39,7 @@ understands: JSON log lines, decoders, rules and compliance tags.
 | **Two BOMs, one run** | CycloneDX 1.6 **CBOM** (certificates, TLS, SSH, libraries) and **AI-BOM** (models, MCP servers, runtimes). Both validated against the official JSON schema in CI. |
 | **Drift that matters** | A baseline remembers every asset. Alerts fire on new, removed and changed assets, and on **cryptographic downgrades** such as TLS 1.3 falling to 1.2 or a lost post-quantum hybrid. |
 | **Provable output** | Each BOM can be wrapped in a **DSSE** envelope signed with Ed25519, so an inventory can be shown untampered. |
-| **Wazuh-native** | 19 finding rules, decoders, an agent snippet and compliance tags. Verified with `wazuh-logtest` on **Wazuh 4.14.10**. `pci_dss_12.3.3` lands in Wazuh's own PCI dashboard field. |
+| **SIEM-native** | 19 finding rules, decoders, an agent snippet and compliance tags. Verified with `logtest` on a live manager (release 4.14.10). `pci_dss_12.3.3` lands in the platform's own PCI dashboard field. |
 | **Safe to run as root** | No shell, no `PATH` lookups, loopback-only probing, secrets never read, atomic 0600 writes. |
 
 ## How it works
@@ -52,8 +52,8 @@ flowchart LR
     S <--> BL[(baseline.json)]
     S -->|Ed25519 DSSE| EN[(*.dsse.json)]
   end
-  S -->|JSON finding lines| W[Wazuh command wodle]
-  W --> M[Wazuh manager<br/>decoder + rules 100900 to 100999]
+  S -->|JSON finding lines| W[SIEM command wodle]
+  W --> M[SIEM manager<br/>decoder + rules 100900 to 100999]
   M --> D[Alerts and dashboards<br/>tagged by framework]
 ```
 
@@ -107,26 +107,26 @@ tesserabom diff old/cbom.json new/cbom.json            # what changed between tw
 Useful options: `--cert-dir`, `--model-dir`, `--mcp-config` (each replaces the defaults), `--all-users` (inspect every user
 home; needed when the agent runs as root or SYSTEM), `--hash-limit-mb`, `--no-update-baseline`, `--skip-crypto`, `--skip-ai`.
 
-A finding, as Wazuh receives it:
+A finding, as the SIEM receives it:
 
 ```json
 {"tesserabom":{"event":"finding","host":"web01","tool_version":"0.3.0","finding":"crypto_downgrade","severity":"high","asset":"tls:127.0.0.1:443","detail":"TLS version dropped from TLSv1.3 to TLSv1.2"}}
 ```
 
-## Wazuh integration
+## SIEM integration
 
-1. Copy `wazuh/decoders/tesserabom_decoders.xml` and `wazuh/rules/tesserabom_rules.xml` to the manager's `etc/decoders/`
+1. Copy `siem/decoders/tesserabom_decoders.xml` and `siem/rules/tesserabom_rules.xml` to the manager's `etc/decoders/`
    and `etc/rules/`, then restart the manager.
-2. Add `wazuh/agent/ossec-agent-snippet.xml` to the agent configuration. It runs a scan every 12 hours through the
-   command wodle. Depending on your Wazuh version, centrally pushed command wodles may need remote commands enabled.
-3. Test offline with `wazuh-logtest` (lines in `wazuh/samples/logtest.txt`) or run `scripts/logtest_docker.sh`.
+2. Add `siem/agent/ossec-agent-snippet.xml` to the agent configuration. It runs a scan every 12 hours through the
+   command wodle. Depending on your SIEM version, centrally pushed command wodles may need remote commands enabled.
+3. Test offline with `logtest` (lines in `siem/samples/logtest.txt`) or run `scripts/logtest_docker.sh`.
 
-> **Tested on a real manager.** `scripts/logtest_docker.sh` starts a Wazuh 4.14.10 container, loads the content, and
+> **Tested on a real manager.** `scripts/logtest_docker.sh` starts a a 4.14.10 manager container, loads the content, and
 > asserts the rule that fires for each sample. It caught two bugs unit tests could not. The command wodle delivers
-> the raw JSON line (verified on a live manager: location `command_tesserabom`, decoded by Wazuh's built-in `json`
+> the raw JSON line (verified on a live manager: location `command_tesserabom`, decoded by the SIEM's built-in `json`
 > decoder), so the rules anchor on the decoded `tesserabom.event` field. `<localfile>` command collection instead
-> wraps lines as `ossec: output: 'tag': ...`, which Wazuh's built-in `ossec` decoder claims first, so a small child
-> decoder handles that form. Not yet covered: a remote agent reporting to a separate manager, and Wazuh 5.x.
+> wraps lines as `ossec: output: 'tag': ...`, which the SIEM's built-in `ossec` decoder claims first, so a small child
+> decoder handles that form. Not yet covered: a remote agent reporting to a separate manager, and the 5.x series.
 
 ### Compliance tags
 
@@ -145,15 +145,15 @@ text in audit evidence. Licensing context is in [docs/LICENSING-NOTES.md](docs/L
 
 The neighbours below were found in a November 2026 search. The search was broad but not exhaustive, so read this as
 "to our knowledge, no open-source project found combines all five of: endpoint collection, CBOM plus AI-BOM, a
-baseline with downgrade detection, signed attestations, and Wazuh-native rules", not as a claim to be first.
+baseline with downgrade detection, signed attestations, and SIEM-native rules", not as a claim to be first.
 
 | Project | Overlaps | What it does not do |
 |---|---|---|
-| [CBOMkit](https://github.com/cbomkit/cbomkit) and Sonar Cryptography | CycloneDX CBOM | Scans source code and container images, not live endpoints. No AI-BOM, drift, signing or Wazuh content. |
-| [cdxgen](https://github.com/cdxgen/cdxgen) | CycloneDX BOMs, MCP and model discovery in build-time scans | A build-time generator, not a continuous endpoint monitor. No Wazuh content. |
-| [AC-Scanner](https://github.com/qubitac/AC-Scanner) | CBOM with run-to-run comparison | Remote network scanner under AGPL-3.0. No AI-BOM, signing or Wazuh. |
-| [Trusera ai-bom](https://github.com/Trusera/ai-bom), [agent-bom](https://github.com/msaad00/agent-bom) | AI-BOM from model files and MCP configs | No CBOM, no Wazuh content, no signed BOMs. |
-| [wazuh-shadow-ai-detection](https://github.com/DShamzaj/wazuh-shadow-ai-detection) | Wazuh rules for unapproved AI use | Detection only: no BOM output, no CBOM, no signing. |
+| [CBOMkit](https://github.com/cbomkit/cbomkit) and Sonar Cryptography | CycloneDX CBOM | Scans source code and container images, not live endpoints. No AI-BOM, drift, signing or SIEM content. |
+| [cdxgen](https://github.com/cdxgen/cdxgen) | CycloneDX BOMs, MCP and model discovery in build-time scans | A build-time generator, not a continuous endpoint monitor. No SIEM content. |
+| [AC-Scanner](https://github.com/qubitac/AC-Scanner) | CBOM with run-to-run comparison | Remote network scanner under AGPL-3.0. No AI-BOM, signing or SIEM. |
+| [Trusera ai-bom](https://github.com/Trusera/ai-bom), [agent-bom](https://github.com/msaad00/agent-bom) | AI-BOM from model files and MCP configs | No CBOM, no SIEM content, no signed BOMs. |
+| Community shadow-AI rules | SIEM rules for unapproved AI use | Detection only: no BOM output, no CBOM, no signing. |
 | [sbom-tools](https://github.com/sbom-tool/sbom-tools) | Diffs and grades SBOM, CBOM and AI-BOM | Consumes BOMs rather than collecting them. |
 | OPSWAT MetaDefender CBOM and AIBOM (commercial) | CBOM plus AI model metadata | File scanning rather than an endpoint collector, per its launch article. |
 
@@ -181,7 +181,7 @@ the tests on Linux and Windows.
 - `hndl_exposure` in the summary line is a transparent prioritisation heuristic, not a validated risk model.
 - Attestations use Ed25519, a classical signature. They prove integrity today and are not post-quantum.
 - Windows SSH and macOS paths get less testing than Linux and the Windows certificate stores.
-- Wazuh 5.x (still a release candidate when this was written) and a full agent-to-manager run are untested.
+- the 5.x series (still a release candidate when this was written) and a full agent-to-manager run are untested.
 
 ## Roadmap
 
@@ -191,15 +191,15 @@ the tests on Linux and Windows.
 - [ ] Agent skill and tool-description inventory with integrity pinning
 - [ ] SPDX 3.0 AI profile and CycloneDX 1.7 export
 - [ ] Post-quantum attestation signatures
-- [ ] Wazuh 5.x content pack
-- [ ] Dashboard pack for the Wazuh indexer
+- [ ] the 5.x series content pack
+- [ ] Dashboard pack for the SIEM indexer
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
 python -m pytest -q
-bash scripts/logtest_docker.sh        # needs Docker; verifies the rules on a real Wazuh manager
+bash scripts/logtest_docker.sh        # needs Docker; verifies the rules on a real SIEM manager
 # Schema validation needs CYCLONEDX_SCHEMA_DIR pointing at bom-1.6.schema.json, spdx.schema.json and
 # jsf-0.82.schema.json from github.com/CycloneDX/specification (tag 1.6, schema/)
 ```

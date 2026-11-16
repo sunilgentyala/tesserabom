@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _rule_patterns():
-    tree = ET.fromstring("<r>" + (ROOT / "wazuh/rules/tesserabom_rules.xml").read_text() + "</r>")
+    tree = ET.fromstring("<r>" + (ROOT / "siem/rules/tesserabom_rules.xml").read_text() + "</r>")
     ids, patterns = [], set()
     for rule in tree.iter("rule"):
         ids.append(rule.get("id"))
@@ -33,12 +33,12 @@ def test_every_finding_kind_has_a_rule():
     emitted.discard("drift_")  # built dynamically in drift.compare
     emitted |= {"drift_added", "drift_removed", "drift_changed"}
     _, patterns = _rule_patterns()
-    assert emitted - patterns == set(), "findings without a Wazuh rule"
+    assert emitted - patterns == set(), "findings without a SIEM rule"
     assert patterns - emitted == set(), "rules for findings the tool never emits"
 
 
 def test_decoders_wellformed():
-    ET.fromstring("<r>" + (ROOT / "wazuh/decoders/tesserabom_decoders.xml").read_text() + "</r>")
+    ET.fromstring("<r>" + (ROOT / "siem/decoders/tesserabom_decoders.xml").read_text() + "</r>")
 
 
 def test_cli_end_to_end_with_drift_and_signing(tmp_path):

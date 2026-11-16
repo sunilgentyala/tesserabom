@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tesserabom"
 version = "0.3.0"
-description = "Endpoint cryptographic (CBOM) and AI/MCP (AI-BOM) inventory with drift detection and signed attestations, built to feed Wazuh."
+description = "Endpoint cryptographic (CBOM) and AI/MCP (AI-BOM) inventory with drift detection and signed attestations, built to feed open-source SIEM platforms."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Sunil Gentyala" }]
-keywords = ["wazuh", "cbom", "cyclonedx", "post-quantum", "ai-bom", "mcp", "siem", "compliance"]
+keywords = ["cbom", "cyclonedx", "post-quantum", "ai-bom", "mcp", "siem", "compliance"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Information Technology",

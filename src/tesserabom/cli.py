@@ -1,7 +1,7 @@
 """Command line entry point.
 
 `scan` writes CycloneDX documents to --out and prints one JSON log line per
-finding to stdout, which is what the Wazuh command wodle ingests.
+finding to stdout, which is what the SIEM command wodle ingests.
 """
 
 import argparse

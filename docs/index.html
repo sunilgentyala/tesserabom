@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tesserabom</title>
-<meta name="description" content="Endpoint CycloneDX CBOM and AI-BOM for Wazuh, with baseline drift and downgrade alerts, signed attestations, and rules verified on a real Wazuh manager.">
+<meta name="description" content="Endpoint CycloneDX CBOM and AI-BOM for open-source SIEM platforms, with baseline drift and downgrade alerts, signed attestations, and rules verified on a real SIEM manager.">
 <link rel="icon" href="assets/tesserabom-mark.svg" type="image/svg+xml">
 <style>
   :root {
@@ -89,14 +89,14 @@
     <h1>One tile per endpoint.</h1>
     <p class="lede">One mosaic of every cipher and every model you run.</p>
     <p class="sub">Endpoint <strong>CBOM</strong> and <strong>AI-BOM</strong> with baseline <strong>drift and downgrade alerts</strong>,
-      <strong>signed attestations</strong>, and <strong>Wazuh-native rules</strong> verified on a real manager.</p>
+      <strong>signed attestations</strong>, and <strong>SIEM-native rules</strong> verified on a real manager.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/sunilgentyala/tesserabom#quick-start">Get started</a>
       <a class="btn" href="https://github.com/sunilgentyala/tesserabom/releases">Releases</a>
     </div>
     <div class="badges">
       <span class="badge">Apache-2.0</span><span class="badge">Python 3.9 to 3.13</span>
-      <span class="badge">CycloneDX 1.6 schema-validated</span><span class="badge">Wazuh 4.14.10 logtest verified</span>
+      <span class="badge">CycloneDX 1.6 schema-validated</span><span class="badge">a 4.14.10 manager logtest verified</span>
       <span class="badge">alpha</span>
     </div>
   </div>
@@ -106,7 +106,7 @@
 <section id="features">
   <h2>Two inventories auditors keep asking for</h2>
   <p>Which cryptography is really running here, and how ready is it for post-quantum migration? Which AI models and MCP servers
-    are on these machines? Wazuh gives you excellent telemetry, and the 4.14.x release notes searched in November 2026 show no
+    are on these machines? The SIEM gives you excellent telemetry, and the 4.14.x release notes searched in November 2026 show no
     native answer to either.</p>
   <div class="grid">
     <div class="card"><h3><span class="dot" style="background:var(--a)"></span>CBOM</h3>
@@ -122,13 +122,13 @@
 
 <section id="how">
   <h2>How it works</h2>
-  <p>A collector runs on each endpoint, writes the BOMs, and prints one JSON line per finding. Wazuh reads those lines through
+  <p>A collector runs on each endpoint, writes the BOMs, and prints one JSON line per finding. The SIEM reads those lines through
     the command wodle and applies 19 rules tagged for PCI DSS, DORA and NYDFS lookups.</p>
   <div class="flow" role="list">
     <div class="step" role="listitem"><b>1. Scan</b>certificates, TLS, SSH, models, MCP</div>
     <div class="step" role="listitem"><b>2. Compare</b>baseline drift and downgrades</div>
     <div class="step" role="listitem"><b>3. Attest</b>CycloneDX plus DSSE signature</div>
-    <div class="step" role="listitem"><b>4. Alert</b>Wazuh decoder, rules, dashboards</div>
+    <div class="step" role="listitem"><b>4. Alert</b>SIEM decoder, rules, dashboards</div>
   </div>
 </section>
 
@@ -144,23 +144,23 @@ tesserabom scan --out /var/lib/tesserabom/out \
 
 tesserabom verify out/cbom.dsse.json --pub /etc/tesserabom/tesserabom-signing.pub
 tesserabom diff old/cbom.json new/cbom.json</code></pre>
-  <p>Wazuh content (decoder, rules, agent snippet) is in the <code>wazuh/</code> folder and in each release as a zip.
+  <p>SIEM content (decoder, rules, agent snippet) is in the <code>siem/</code> folder and in each release as a zip.
     <code>scripts/logtest_docker.sh</code> repeats the manager test.</p>
 </section>
 
 <section id="compare">
   <h2>How it differs</h2>
   <p>Found in a November 2026 search that was broad but not exhaustive: to our knowledge, no open-source project combines endpoint
-    collection, CBOM plus AI-BOM, a downgrade baseline, signed attestations and Wazuh-native rules. This is not a claim to be first.</p>
+    collection, CBOM plus AI-BOM, a downgrade baseline, signed attestations and SIEM-native rules. This is not a claim to be first.</p>
   <div class="tablewrap">
     <table>
       <thead><tr><th>Project</th><th>Overlaps</th><th>Does not do</th></tr></thead>
       <tbody>
-        <tr><td>CBOMkit, Sonar Cryptography</td><td>CycloneDX CBOM</td><td>Source and image scanning only. No AI-BOM, drift, signing or Wazuh.</td></tr>
-        <tr><td>cdxgen</td><td>BOMs, MCP and model discovery at build time</td><td>Not a continuous endpoint monitor. No Wazuh content.</td></tr>
-        <tr><td>AC-Scanner</td><td>CBOM with run comparison</td><td>Remote scanner, AGPL-3.0. No AI-BOM, signing or Wazuh.</td></tr>
-        <tr><td>Trusera ai-bom, agent-bom</td><td>AI-BOM from models and MCP configs</td><td>No CBOM, Wazuh content or signed BOMs.</td></tr>
-        <tr><td>wazuh-shadow-ai-detection</td><td>Wazuh rules for unapproved AI</td><td>Detection only. No BOM output or signing.</td></tr>
+        <tr><td>CBOMkit, Sonar Cryptography</td><td>CycloneDX CBOM</td><td>Source and image scanning only. No AI-BOM, drift, signing or SIEM.</td></tr>
+        <tr><td>cdxgen</td><td>BOMs, MCP and model discovery at build time</td><td>Not a continuous endpoint monitor. No SIEM content.</td></tr>
+        <tr><td>AC-Scanner</td><td>CBOM with run comparison</td><td>Remote scanner, AGPL-3.0. No AI-BOM, signing or SIEM.</td></tr>
+        <tr><td>Trusera ai-bom, agent-bom</td><td>AI-BOM from models and MCP configs</td><td>No CBOM, SIEM content or signed BOMs.</td></tr>
+        <tr><td>Community shadow-AI rules</td><td>SIEM rules for unapproved AI</td><td>Detection only. No BOM output or signing.</td></tr>
       </tbody>
     </table>
   </div>
@@ -171,7 +171,7 @@ tesserabom diff old/cbom.json new/cbom.json</code></pre>
   <div class="note">
     Post-quantum TLS status depends on what the probing client can negotiate. SSH status uses <code>sshd -T</code> only as root.
     tesserabom never launches MCP servers, so it pins the configured launch spec but cannot see a server change what it advertises.
-    Attestations use Ed25519, a classical signature. Wazuh 5.x and a remote agent reporting to a separate manager are untested.
+    Attestations use Ed25519, a classical signature. the 5.x series and a remote agent reporting to a separate manager are untested.
     Compliance tags are lookup aids, not statements of compliance.
   </div>
 </section>

@@ -1,5 +1,5 @@
 include LICENSE README.md CHANGELOG.md SECURITY.md
-recursive-include wazuh *
+recursive-include siem *
 recursive-include docs *
 recursive-include scripts *
 recursive-include tests *.py

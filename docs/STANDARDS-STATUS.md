@@ -15,7 +15,7 @@ Re-check anything marked **Unconfirmed** against the primary source before relyi
 | CycloneDX 1.7 / ECMA-424 | Possible future target | **Unconfirmed.** Field-level changes were not reviewed. |
 | SPDX 3.0 AI profile, CISA "SBOM for AI" minimum elements | Possible future export | **Unconfirmed.** Publication date and field list were not retrieved. |
 
-## Regulatory tags in `wazuh/rules/tesserabom_rules.xml`
+## Regulatory tags in `siem/rules/tesserabom_rules.xml`
 
 | Tag | Source | Status |
 |---|---|---|
@@ -39,17 +39,17 @@ Re-check anything marked **Unconfirmed** against the primary source before relyi
 | OpenSSH 9.9: `mlkem768x25519-sha256` added and "available by default" for ssh(1) and sshd(8) | **Confirmed** from the official 9.9 release notes. |
 | OpenSSH 10.0: `mlkem768x25519-sha256` "now used by default for key agreement" | **Confirmed** from the official 10.0 release notes, which name ssh(1), the client, only. |
 | OpenSSL 3.5 adds ML-KEM, ML-DSA and SLH-DSA (FIPS 203, 204, 205), is an LTS release, and prefers a hybrid X25519MLKEM768 TLS group by default | **Corroborated** by several secondary sources and the project's pre-release announcement. The final release post was not fetched directly. The tool only relies on the 3.5 threshold for ML-KEM. |
-| Wazuh 4.14.x has no native CBOM, crypto inventory or AI inventory | A targeted search of the 4.14.x release notes and changelogs (4.14.0 through 4.14.10) found no SBOM, CBOM, cryptographic inventory, AI inventory or post-quantum feature. The 4.14.0 inventory expansion covers browser extensions, services, users and groups. No public roadmap page was found, so future plans are unknown. Not every release's full notes were read, and the 5.0 line was still a release candidate. |
+| The 4.14.x series has no native CBOM, crypto inventory or AI inventory | A targeted search of the 4.14.x release notes and changelogs (4.14.0 through 4.14.10) found no SBOM, CBOM, cryptographic inventory, AI inventory or post-quantum feature. The 4.14.0 inventory expansion covers browser extensions, services, users and groups. No public roadmap page was found, so future plans are unknown. Not every release's full notes were read, and the 5.0 line was still a release candidate. |
 
-## Wazuh behaviour
+## SIEM behaviour
 
 | Item | Status |
 |---|---|
-| Decoders and rules produce the expected alerts | **Confirmed** on Wazuh 4.14.10 with `wazuh-logtest` (`scripts/logtest_docker.sh`). |
+| Decoders and rules produce the expected alerts | **Confirmed** on a 4.14.10 manager with `logtest` (`scripts/logtest_docker.sh`). |
 | `pci_dss_*` group tags are promoted to the native `rule.pci_dss` field | **Confirmed** in the same run. |
 | Command wodle delivers the raw JSON line, decoded by the built-in `json` decoder (location `command_tesserabom`) | **Confirmed** on a live 4.14.10 manager running the wodle locally. The `ossec: output: 'tag':` prefix applies to `<localfile>` command collection only. |
 | A remote agent reporting to a separate manager | **Not tested.** |
-| Wazuh 5.x (Engine replaces analysisd) | **Not tested.** Rule and decoder syntax may need changes. |
+| The 5.x series (Engine replaces analysisd) | **Not tested.** Rule and decoder syntax may need changes. |
 
 ## Detection claims and their limits
 

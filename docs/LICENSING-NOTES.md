@@ -1,39 +1,29 @@
 # Licensing notes
 
-This is an engineering summary of how the project relates to Wazuh's license terms. It is **not legal advice**.
-If you plan to redistribute this add-on together with Wazuh, or to ship it inside a commercial product, ask counsel.
+This is an engineering summary, **not legal advice**. If you plan to redistribute this add-on together with a SIEM
+platform, or to ship it inside a commercial product, ask counsel.
 
-## What Wazuh says about its own licensing
+## How this project relates to the SIEM platform it feeds
 
-From the Wazuh repository (read November 2026):
+Open-source SIEM platforms are typically licensed under GPL-2.0 or AGPL-3.0, sometimes with their own clarification of
+what counts as a derivative work. Such clarifications usually restrict redistribution of the platform or of its code and
+data files, and say little about separate programs that only exchange logs with it.
 
-- The Wazuh engine under `src/engine/` is AGPLv3 or later.
-- Shared libraries under `src/shared_modules/` are dual-licensed `GPL-2.0-only OR AGPL-3.0-or-later`.
-- "Everything else is licensed under GPLv2", with a special exception permitting linking with OpenSSL.
-- The `LICENSE` file adds Wazuh's own interpretation of "derivative work". It lists, as a non-exclusive clarification,
-  an application that integrates source code or data files from Wazuh, includes Wazuh copyrighted material, includes
-  or integrates Wazuh into a proprietary executable installer, or links to a library or executes a program that does
-  any of those things. It also states that these restrictions "only apply if you actually redistribute Wazuh (or parts of it)".
-- The README and `LICENSE` do not address separate programs that merely communicate with Wazuh through logs, APIs or
-  the agent protocol.
-
-## How this project is built relative to those terms
-
-| Question | Answer |
+| Question | Answer for this repository |
 |---|---|
-| Does the repository contain Wazuh source code or data files? | No. The decoders and rules are original XML written for this project, using Wazuh's documented configuration syntax. |
-| Does it link to a Wazuh library? | No. It is a standalone Python program. |
-| How does it reach Wazuh? | Through the command wodle: the program prints JSON log lines and Wazuh reads them. |
-| Does it redistribute Wazuh? | No. Users install Wazuh separately. |
-| Runtime dependency | `cryptography` (Apache-2.0 or BSD-3-Clause, dual-licensed). Development-only: `pytest`, `jsonschema`. |
-| Vendored third-party files | None. The CycloneDX schemas are downloaded by CI and by the developer when validating, never committed. |
+| Does it contain the platform's source code or data files? | No. The decoders and rules are original XML written for this project, using the platform's documented configuration syntax. |
+| Does it link to a platform library? | No. It is a standalone Python program. |
+| How does it reach the platform? | Through the agent's command module: the program prints JSON log lines and the platform reads them. |
+| Does it redistribute the platform? | No. Users install the platform separately. |
 
-On that basis Apache-2.0 for this repository is a reasonable choice, and nothing in Wazuh's published terms was found
-that conflicts with it. The residual uncertainty is the one Wazuh itself leaves open: whether decoder and rule files
-that are loaded into a GPL program count as "data files from Wazuh". They contain none of Wazuh's own content. Anyone
-who wants certainty before redistributing them inside a Wazuh package should get legal review.
+## Conclusion
 
-## If you would rather be conservative
+Apache-2.0 for this repository is a reasonable choice, and nothing in the published terms read in November 2026 was
+found to conflict with it. The residual uncertainty is the one the platform's own license leaves open: whether decoder
+and rule files loaded into a GPL program count as its "data files". They contain none of its content. Anyone who wants
+certainty before redistributing them inside a platform package should get legal review.
 
-Licensing the `wazuh/` directory (decoders, rules, agent snippet) under GPL-2.0 while keeping the Python code under
-Apache-2.0 would remove the question for the part that is loaded into Wazuh, at the cost of a mixed-license repository.
+## Option
+
+Licensing the `siem/` directory (decoders, rules, agent snippet) under GPL-2.0 while keeping the Python code under
+Apache-2.0 would remove the question for the part loaded into the platform, at the cost of a mixed-license repository.

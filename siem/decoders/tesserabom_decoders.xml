@@ -1,7 +1,7 @@
 <!-- tesserabom decoders -->
 <!--
-  The command wodle delivers raw JSON lines, which Wazuh's built-in json decoder already parses, so no decoder is
-  needed for it. Only <localfile> command collection wraps lines as "ossec: output: 'tag': ...". Wazuh's built-in
+  The command wodle delivers raw JSON lines, which the SIEM's built-in json decoder already parses, so no decoder is
+  needed for it. Only <localfile> command collection wraps lines as "ossec: output: 'tag': ...". the SIEM's built-in
   "ossec" decoder claims those first, so this is a child of it that parses the JSON payload.
 -->
 <decoder name="tesserabom-json">
